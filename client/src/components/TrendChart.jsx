@@ -42,6 +42,15 @@ function clamp(v, lo, hi) {
   return Math.min(Math.max(v, lo), hi);
 }
 
+// The Y axis's top/bottom ticks are the exact yDomain boundary (an
+// unrounded float, e.g. from `max + pad`), unlike Recharts' own in-between
+// "nice" ticks -- round it for display so it doesn't overflow the axis
+// label width with raw floating-point digits.
+function fmtAxisNumber(v) {
+  const rounded = Math.round(v * 10) / 10;
+  return rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1);
+}
+
 // Linear-interpolate the value of a sorted {t,v}[] series at time t.
 function valueAt(points, t) {
   if (!points || !points.length) return null;
@@ -434,6 +443,7 @@ const TrendChart = forwardRef(function TrendChart(
             tick={{ fill: 'var(--axis)', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}
             width={56}
             domain={yDomain}
+            tickFormatter={fmtAxisNumber}
             allowDataOverflow
           />
           <Tooltip

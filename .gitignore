@@ -1,0 +1,11 @@
+node_modules/
+
+# Runtime SQLite data -- generated locally, not source
+server/*.db
+server/*.db-shm
+server/*.db-wal
+
+# Local overrides for PLC connection settings / logging tag list (see the
+# Settings page) -- machine-specific, not something to version.
+server/settings.json
+server/tags.json

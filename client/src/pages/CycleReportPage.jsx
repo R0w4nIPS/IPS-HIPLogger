@@ -155,6 +155,18 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
             {running ? 'Running' : 'Complete'}
           </span>
         </div>
+        <div className="report-meta-item">
+          <span className="report-meta-label">Name</span>
+          <span className="report-meta-value">{cycle.name || '—'}</span>
+        </div>
+        <div className="report-meta-item">
+          <span className="report-meta-label">Batch Code</span>
+          <span className="report-meta-value">{cycle.batchCode || '—'}</span>
+        </div>
+        <div className="report-meta-item">
+          <span className="report-meta-label">Operator</span>
+          <span className="report-meta-value">{cycle.operator || '—'}</span>
+        </div>
       </section>
 
       {chartData && chartData.series.length > 0 && (

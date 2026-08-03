@@ -14,6 +14,9 @@ export default function TopNav({ page, onNavigate, status }) {
         <button className={page === 'dashboard' ? 'active' : ''} onClick={() => onNavigate('/dashboard')}>
           Dashboard
         </button>
+        <button className={page === 'settings' ? 'active' : ''} onClick={() => onNavigate('/settings')}>
+          Settings
+        </button>
       </nav>
       <div className={`plc-status ${status}`}>
         <span className="led" />

@@ -1,24 +1,30 @@
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const { WebSocketServer } = require('ws');
 
 const config = require('./config');
 const PlcPoller = require('./plc');
 const SimPoller = require('./simulator');
+const ReplayPoller = require('./replay');
 const TrendBuffer = require('./buffer');
 const TrendDB = require('./db');
 
 const DEMO = process.env.DEMO === '1' || process.argv.includes('--demo') || !!config.demo;
+const REPLAY = process.env.REPLAY === '1' || process.argv.includes('--replay') || !!config.replay?.enabled;
 
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-// Demo mode never touches the real database, so fake samples can't mix
-// with production history if this ever runs on the same machine/file.
+// Demo/replay modes never touch the real database, so fake/replayed samples
+// can't mix with production history if this ever runs on the same
+// machine/file. (Replay reads the real trend.db separately, read-only, in
+// replay.js -- this only controls where its output gets written.)
 const db = new TrendDB(
-  DEMO ? { ...config, db: { ...config.db, file: 'trend.demo.db' } } : config
+  (DEMO || REPLAY) ? { ...config, db: { ...config.db, file: 'trend.demo.db' } } : config
 );
 // Tags with `trend: false` (e.g. the db1001 cycle/status signals) never go
 // in the RAM history buffer -- they're only ever shown as a `latest` value
@@ -26,10 +32,17 @@ const db = new TrendDB(
 const trendTagNames = Object.keys(config.tags).filter((name) => config.tags[name].trend !== false);
 
 const buffer = new TrendBuffer(trendTagNames, config.retentionSeconds);
-const poller = DEMO ? new SimPoller(config) : new PlcPoller(config);
+const poller = REPLAY ? new ReplayPoller(config) : DEMO ? new SimPoller(config) : new PlcPoller(config);
 let plcStatus = 'offline';
 
-if (DEMO) console.log('[demo] simulating tag data — no PLC connection will be made');
+if (REPLAY) {
+  console.log(
+    `[replay] looping recorded cycle ${new Date(config.replay.from).toISOString()} -> ` +
+      `${new Date(config.replay.to).toISOString()} — no PLC connection will be made`
+  );
+} else if (DEMO) {
+  console.log('[demo] simulating tag data — no PLC connection will be made');
+}
 
 // Seed the RAM buffer from SQLite so trends survive a server restart
 {
@@ -162,6 +175,18 @@ app.get('/api/history', (req, res) => {
   res.json({ tag, from, to, points });
 });
 
+// Shared shape for a cycle row across the list/get/patch endpoints below.
+function serializeCycle(r) {
+  return {
+    id: r.id,
+    from: r.start_t,
+    to: r.end_t,
+    name: r.name,
+    batchCode: r.batch_code,
+    operator: r.operator,
+  };
+}
+
 // /api/cycles -- every logged cycle (a LoggingOnOff true..false span), most
 // recent first, for the Cycles page. `to: null` means the cycle is still
 // running (LoggingOnOff hasn't gone false yet).
@@ -172,7 +197,7 @@ app.get('/api/cycles', (req, res) => {
   const from = req.query.from ? Number(req.query.from) : null;
   const to = req.query.to ? Number(req.query.to) : null;
   const rows = db.listCycles(limit, from, to);
-  res.json(rows.map((r) => ({ id: r.id, from: r.start_t, to: r.end_t })));
+  res.json(rows.map(serializeCycle));
 });
 
 // /api/cycles/:id -- a single cycle, for the cycle report page (direct link,
@@ -180,11 +205,178 @@ app.get('/api/cycles', (req, res) => {
 app.get('/api/cycles/:id', (req, res) => {
   const row = db.getCycle(Number(req.params.id));
   if (!row) return res.status(404).json({ error: 'cycle not found' });
-  res.json({ id: row.id, from: row.start_t, to: row.end_t });
+  res.json(serializeCycle(row));
+});
+
+// /api/cycles/:id -- update a cycle's traceability fields (name/batch
+// code/operator), edited inline on the Cycles page. Always sends the row's
+// full desired metadata, not a partial patch, so this stays a plain UPDATE.
+app.patch('/api/cycles/:id', (req, res) => {
+  const row = db.getCycle(Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'cycle not found' });
+  const { name, batchCode, operator } = req.body || {};
+  db.updateCycleMeta(row.id, { name, batchCode, operator });
+  res.json(serializeCycle(db.getCycle(row.id)));
+});
+
+// /api/cycles/:id -- delete a cycle's record from the Cycles page. Only
+// removes the cycle row itself; its logged samples stay in trend.db.
+app.delete('/api/cycles/:id', (req, res) => {
+  const row = db.getCycle(Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'cycle not found' });
+  db.deleteCycle(row.id);
+  res.json({ ok: true });
 });
 
 app.get('/api/status', (_req, res) => {
   res.json({ plc: plcStatus, clients: wss.clients.size, logging: loggingEnabled });
+});
+
+function validatePlcSettings(body) {
+  const { host, port, rack, slot, timeout } = body || {};
+  if (typeof host !== 'string' || !host.trim()) return { error: 'host is required' };
+  const nums = { port: Number(port), rack: Number(rack), slot: Number(slot), timeout: Number(timeout) };
+  for (const [key, value] of Object.entries(nums)) {
+    if (!Number.isFinite(value) || value < 0) return { error: `invalid ${key}` };
+  }
+  return { value: { host: host.trim(), ...nums } };
+}
+
+// /api/settings/plc -- current PLC connection settings for the Settings
+// page, plus which poller is actually running (DEMO/REPLAY don't use these
+// at all, so the page can say so instead of implying a save takes effect).
+app.get('/api/settings/plc', (_req, res) => {
+  res.json({ plc: config.plc, mode: REPLAY ? 'replay' : DEMO ? 'demo' : 'live' });
+});
+
+// Persists to settings.json (see config.js) and updates the in-memory
+// config.plc in place -- PlcPoller reads config.plc fresh on every
+// (re)connect attempt, so mutating the same object it already holds a
+// reference to is enough; no need to reconstruct it.
+app.put('/api/settings/plc', (req, res) => {
+  const { error, value } = validatePlcSettings(req.body);
+  if (error) return res.status(400).json({ error });
+
+  Object.assign(config.plc, value);
+  try {
+    fs.writeFileSync(path.join(__dirname, 'settings.json'), JSON.stringify({ plc: value }, null, 2));
+  } catch (err) {
+    return res.status(500).json({ error: `failed to save settings.json: ${err.message}` });
+  }
+
+  // Apply immediately if a real PLC connection is what's actually running.
+  if (!DEMO && !REPLAY) {
+    poller.stop();
+    poller.start();
+  }
+  res.json({ plc: config.plc });
+});
+
+// /api/settings/plc/test -- one-shot connect/disconnect against whatever
+// the form currently holds (not necessarily saved yet), for the "Test
+// Connection" button.
+app.post('/api/settings/plc/test', async (req, res) => {
+  const { error, value } = validatePlcSettings(req.body);
+  if (error) return res.status(400).json({ ok: false, error });
+  res.json(await PlcPoller.testConnection(value));
+});
+
+// Only the analog/sensor tags (trend !== false) are managed by the Settings
+// page's tag editor -- the db1001 cycle/status signals (Mode, CycleStatus,
+// AlarmActive, ...) carry a per-value `labels` map each, which is a
+// different, more specialized UI than a flat name/address/unit table.
+const TAG_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const isEditableTag = (def) => def.trend !== false;
+
+function serializeTagRow(name, def) {
+  return {
+    name,
+    address: def.address,
+    unit: def.unit || '',
+    decimals: def.decimals ?? 1,
+    color: def.color || '#666666',
+    defaultActive: def.defaultActive !== false,
+  };
+}
+
+function validateTagsPayload(body, preservedNames) {
+  const rows = body?.tags;
+  if (!Array.isArray(rows) || !rows.length) return { error: 'tags must be a non-empty array' };
+
+  const seen = new Set();
+  const clean = [];
+  for (const row of rows) {
+    const name = String(row.name || '').trim();
+    const address = String(row.address || '').trim();
+    if (!TAG_NAME_RE.test(name)) {
+      return { error: `"${name}" isn't a valid tag name (letters, digits, underscore; can't start with a digit)` };
+    }
+    if (seen.has(name)) return { error: `duplicate tag name: ${name}` };
+    if (preservedNames.has(name)) return { error: `"${name}" is a reserved cycle/status tag name` };
+    seen.add(name);
+    if (!address) return { error: `${name}: address is required` };
+    const decimals = Number(row.decimals);
+    clean.push({
+      name,
+      originalName: row.originalName ? String(row.originalName).trim() : null,
+      address,
+      unit: String(row.unit || ''),
+      decimals: Number.isFinite(decimals) ? decimals : 1,
+      color: String(row.color || '#666666'),
+      defaultActive: row.defaultActive !== false,
+    });
+  }
+  return { value: clean };
+}
+
+// /api/settings/tags -- the editable analog/sensor tag list, as an array
+// (rather than the name-keyed object used internally) so the client can
+// track each row's original name across an edit for rename detection.
+app.get('/api/settings/tags', (_req, res) => {
+  const tags = Object.entries(config.tags)
+    .filter(([, def]) => isEditableTag(def))
+    .map(([name, def]) => serializeTagRow(name, def));
+  res.json({ tags });
+});
+
+// Persists to tags.json (see config.js) and updates the in-memory
+// config.tags in place. Unlike PLC settings, this never applies live -- the
+// active poller, the RAM trend buffer, and the WebSocket 'hello' schema are
+// all built once from config.tags at startup, so a tag rename/add/remove
+// always needs a restart to actually take effect.
+app.put('/api/settings/tags', (req, res) => {
+  const preserved = Object.fromEntries(Object.entries(config.tags).filter(([, def]) => !isEditableTag(def)));
+  const { error, value } = validateTagsPayload(req.body, new Set(Object.keys(preserved)));
+  if (error) return res.status(400).json({ error });
+
+  // Carry historical samples over to a tag's new name so existing
+  // trend/CSV/report history stays reachable, instead of getting silently
+  // orphaned under the name it used to be logged as.
+  for (const row of value) {
+    if (row.originalName && row.originalName !== row.name && config.tags[row.originalName]) {
+      TrendDB.renameTagInFile('trend.db', row.originalName, row.name);
+    }
+  }
+
+  const nextTags = { ...preserved };
+  for (const row of value) {
+    nextTags[row.name] = {
+      address: row.address,
+      unit: row.unit || undefined,
+      decimals: row.decimals,
+      color: row.color,
+      defaultActive: row.defaultActive,
+    };
+  }
+
+  config.tags = nextTags;
+  try {
+    fs.writeFileSync(path.join(__dirname, 'tags.json'), JSON.stringify(nextTags, null, 2));
+  } catch (err) {
+    return res.status(500).json({ error: `failed to save tags.json: ${err.message}` });
+  }
+
+  res.json({ tags: value, restartRequired: true });
 });
 
 // /api/export.csv?tags=Pressure_bar,Flow_lpm&from=<ms>&to=<ms>

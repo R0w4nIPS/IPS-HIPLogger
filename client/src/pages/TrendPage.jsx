@@ -31,7 +31,7 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
   const [cursorReadout, setCursorReadout] = useState(null); // name -> {a, b, delta} | null
   const [cursorToolbar, setCursorToolbar] = useState({ visible: false, zoomed: false, dtLabel: '' });
   const chartRef = useRef(null);
-  const [, forceRender] = useState(0);
+  const [renderTick, forceRender] = useState(0);
 
   // Tags marked `trend: false` server-side (db1001 cycle/status signals)
   // are excluded here entirely -- no tile, no picker entry, no chart line,
@@ -281,7 +281,7 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
       points: (source[name] || []).filter((p) => p.t >= from && p.t <= to),
     })) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trendableTags, enabled, selected, windowSec, paused, latest, panMs, usingCustomRange]);
+  }, [trendableTags, enabled, selected, windowSec, paused, latest, panMs, usingCustomRange, renderTick]);
 
   return (
     <div className="app">

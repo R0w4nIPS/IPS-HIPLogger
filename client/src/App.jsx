@@ -3,6 +3,7 @@ import TrendPage from './pages/TrendPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import CyclesPage from './pages/CyclesPage.jsx';
 import CycleReportPage from './pages/CycleReportPage.jsx';
+import SettingsPage from './pages/SettingsPage.jsx';
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname);
@@ -33,11 +34,13 @@ export default function App() {
 
   const reportMatch = path.match(/^\/cycles\/(\d+)\/report$/);
 
-  const page = path === '/dashboard' ? 'dashboard' : path === '/cycles' ? 'cycles' : 'trend';
+  const page =
+    path === '/dashboard' ? 'dashboard' : path === '/cycles' ? 'cycles' : path === '/settings' ? 'settings' : 'trend';
 
   if (reportMatch) return <CycleReportPage cycleId={reportMatch[1]} onNavigate={navigate} />;
   if (page === 'dashboard') return <DashboardPage page={page} onNavigate={navigate} />;
   if (page === 'cycles') return <CyclesPage page={page} onNavigate={navigate} onSelectCycle={openCycle} />;
+  if (page === 'settings') return <SettingsPage page={page} onNavigate={navigate} />;
   return (
     <TrendPage
       page={page}

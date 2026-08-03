@@ -11,7 +11,10 @@
 //   3. S7-1500 connects with rack 0, slot 1.
 // ---------------------------------------------------------------------------
 
-module.exports = {
+const fs = require('fs');
+const path = require('path');
+
+const config = {
   plc: {
     host: '192.168.0.1',   // CPU IP address
     port: 102,
@@ -80,11 +83,13 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
       address: 'DB1001,X0.0', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'Off' }, 1: { text: 'On', level: 'ok' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 1,
     },
     Mode: {
       address: 'DB1001,X0.1', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'Manual', level: 'info' }, 1: { text: 'Auto', level: 'info' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 1,
     },
     // NOTE: written as "db1001.2" (no bit) -- assumed DB1001,INT2.
     CycleStatus: {
@@ -96,6 +101,7 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
         4: { text: 'Stopped', level: 'bad' },
       },
       sim: { discrete: true, values: [1, 2, 3, 4], flipChance: 0.02 },
+      replayValue: 1,
     },
     // NOTE: written as "db1001.4" (no bit) -- assumed DB1001,INT4.
     SegmentType: {
@@ -115,27 +121,32 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
         12: { text: 'Flush Lines' },
       },
       sim: { discrete: true, values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], flipChance: 0.03 },
+      replayValue: 4,
     },
     // NOTE: written as "db1001.6" with siblings at .6.1/.6.2/.6.3 -- assumed bit 0.
     AlarmActive: {
       address: 'DB1001,X6.0', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'OK', level: 'ok' }, 1: { text: 'Alarm Active', level: 'bad' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 0,
     },
     VesselPosition: {
       address: 'DB1001,X6.1', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'Open' }, 1: { text: 'Closed' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 1,
     },
     FurnaceOn: {
       address: 'DB1001,X6.2', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'Off' }, 1: { text: 'On', level: 'ok' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 1,
     },
     CoolingRunning: {
       address: 'DB1001,X6.3', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'Stopped', level: 'bad' }, 1: { text: 'Running', level: 'ok' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.01 },
+      replayValue: 0,
     },
     // NOTE: written as "db1001.8.0" -- Int types don't take a bit suffix in
     // this scheme, so this assumes the bit was a copy/paste artifact and the
@@ -148,16 +159,19 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
         3: { text: 'Alarm', level: 'bad' },
       },
       sim: { discrete: true, values: [0, 1, 3], flipChance: 0.01 },
+      replayValue: 0,
     },
     TopZoneActiveTC: {
       address: 'DB1001,X10.0', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'A' }, 1: { text: 'B' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.005 },
+      replayValue: 0,
     },
     BotZoneActiveTC: {
       address: 'DB1001,X10.1', kind: 'bool', defaultActive: false, trend: false, log: false,
       labels: { 0: { text: 'A' }, 1: { text: 'B' } },
       sim: { discrete: true, values: [0, 1], flipChance: 0.005 },
+      replayValue: 0,
     },
   },
 
@@ -165,6 +179,24 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
   // random-walk values for each tag (see simulator.js). Enable with the
   // DEMO=1 env var, `node index.js --demo`, or by setting this to true.
   demo: false,
+
+  // Replay mode: skip the PLC and instead loop a real recorded cycle read
+  // back out of trend.db (see replay.js) -- looks like an actual process
+  // run instead of simulator.js's random walk. Enable with the REPLAY=1
+  // env var, `node index.js --replay`, or by setting enabled: true here.
+  // Implies demo-mode's SQLite isolation (writes go to trend.demo.db, the
+  // real trend.db is only ever read from here).
+  replay: {
+    enabled: false,
+    sourceFile: 'trend.db',   // relative to the server directory
+    from: 1784109903846,      // 2026-07-15 10:05:03 UTC -- start of the cycle
+    to: 1784128104722,        // 2026-07-15 15:08:24 UTC -- end of that cycle (~5h)
+    // How long (ms) loggingGateTag drops to 0 right before each loop wraps,
+    // so every pass closes out as its own row on the Cycles page instead of
+    // one cycle that grows forever. Keep well above pollIntervalMs so the
+    // gate reliably sees at least one off sample despite poll timing jitter.
+    loopGapMs: 3000,
+  },
 
   // Polling interval in ms. 500-1000 ms is comfortable for one CPU;
   // nodes7 packs all items into as few PDUs as possible.
@@ -204,3 +236,31 @@ Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color
   // HTTP + WebSocket port
   httpPort: 8080,
 };
+
+// The PLC connection fields above are just the shipped-with-the-code
+// defaults. The Settings page lets an operator change them (e.g. after the
+// CPU's IP changes) without editing this file -- those edits are persisted
+// separately here and override the defaults above at startup.
+const settingsFile = path.join(__dirname, 'settings.json');
+try {
+  const saved = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+  if (saved.plc) Object.assign(config.plc, saved.plc);
+} catch {
+  /* no settings.json yet, or it's unreadable -- the defaults above stand */
+}
+
+// Likewise for the tag map's analog/sensor tags (see the Settings page's tag
+// editor): once the operator saves any change there, tags.json becomes the
+// full source of truth going forward and wholesale replaces `tags` above --
+// unlike `plc` this isn't a shallow merge, since renaming/removing a tag
+// there needs to actually take the old entry out, not just override fields
+// on top of it.
+const tagsFile = path.join(__dirname, 'tags.json');
+try {
+  const savedTags = JSON.parse(fs.readFileSync(tagsFile, 'utf8'));
+  if (savedTags && typeof savedTags === 'object') config.tags = savedTags;
+} catch {
+  /* no tags.json yet, or it's unreadable -- the hardcoded tags above stand */
+}
+
+module.exports = config;
