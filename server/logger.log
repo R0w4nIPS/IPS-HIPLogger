@@ -1,0 +1,686 @@
+[demo] simulating tag data — no PLC connection will be made
+[db] restored 150 samples into the RAM buffer
+[http] listening on :8080
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] restored 0 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 0 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] restored 20625 samples into the RAM buffer
+[http] listening on :8080
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[plc] read failed, reconnecting
+[plc] status: offline
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 0 samples into the RAM buffer
+[http] listening on :8080
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[plc] read failed, reconnecting
+[plc] status: offline
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[db] restored 0 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[plc] read failed, reconnecting
+[plc] status: offline
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connect failed: connect EHOSTUNREACH 192.168.0.1:102
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] restored 240375 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 219675 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] restored 229900 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 229900 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 229900 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 229900 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] logging enabled (LoggingOnOff)
+[db] logging disabled (LoggingOnOff)
+[db] restored 463650 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online
+[db] restored 463650 samples into the RAM buffer
+[http] listening on :8080
+[plc] connected to 192.168.0.1 (rack 0, slot 1)
+[plc] status: online

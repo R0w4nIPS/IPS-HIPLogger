@@ -1,0 +1,16 @@
+{
+  "name": "s7-trend-server",
+  "version": "1.0.0",
+  "description": "Polls a Siemens S7-1500 and serves live + historical trend data",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "demo": "node index.js --demo"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.19.2",
+    "nodes7": "^0.3.14",
+    "ws": "^8.17.0"
+  }
+}
