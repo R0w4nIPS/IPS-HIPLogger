@@ -70,6 +70,38 @@ body {
   color: var(--accent);
 }
 
+/* ------------------------------------------------------------ cycle bar */
+.cyclebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  padding: 10px 16px;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: rgba(22, 163, 74, 0.06);
+}
+.cyclebar-item {
+  font: 500 13px 'IBM Plex Mono', monospace;
+  color: var(--text);
+  white-space: nowrap;
+}
+.cyclebar-label {
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+
+/* ------------------------------------------------------------ range bar */
+.rangebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
 /* ----------------------------------------------------------- bottom bar */
 .bottombar {
   display: flex;
@@ -105,6 +137,28 @@ body {
 .window-select button:focus-visible,
 .pause:focus-visible,
 .tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.window-shift {
+  display: flex;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.shift-btn {
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  padding: 16px 20px;
+  font: 500 16px 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  border-right: 1px solid var(--edge);
+}
+.shift-btn:last-child { border-right: none; }
+.shift-btn:hover { color: var(--text); }
+.shift-btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
@@ -793,6 +847,24 @@ body {
 .settings-form input:focus-visible {
   outline: none;
   border-color: var(--accent);
+}
+
+.settings-form--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.settings-form--row label:nth-child(1) { flex: 2 1 220px; }
+.settings-form--row label:nth-child(2) { flex: 1 1 100px; }
+.settings-form--row label:nth-child(3) { flex: 1 1 80px; }
+.settings-form--row label:nth-child(4) { flex: 1 1 80px; }
+.settings-form--row label:nth-child(5) { flex: 1 1 130px; }
+.settings-form--row .settings-actions {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+.settings-form--row .settings-result {
+  flex: 1 1 100%;
 }
 
 .settings-actions {

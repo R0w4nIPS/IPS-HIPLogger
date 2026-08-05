@@ -39,11 +39,11 @@ const config = {
   // browser (localStorage) and takes over from this default going forward.
   // Set to `false` for tags that should start hidden until picked.
   tags: {
-Pressure_Setpoint:  { address: 'DB1000,REAL96',  unit: 'bar', decimals: 1, color: '#ac3500', defaultActive: true, sim: { min: 0, max: 2000, start: 900, noise: 0.005, pull: 0.03 } },
+Pressure_Setpoint:  { address: 'DB1000,REAL92',  unit: 'bar', decimals: 1, color: '#ac3500', defaultActive: true, sim: { min: 0, max: 2000, start: 900, noise: 0.005, pull: 0.03 } },
     Vessel_Pressure:   { address: 'DB1000,REAL0',  unit: 'bar', decimals: 1, color: '#863ca4', defaultActive: true, sim: { min: 0, max: 2000, noise: 0.03 } },
     Bottle_Pressure:  { address: 'DB1000,REAL4',  unit: 'bar',  decimals: 1, color: '#be478d', defaultActive: true, sim: { min: 0, max: 400, noise: 0.03 } },
     Vacuum_Pressure:       { address: 'DB1000,REAL8',  unit: 'mbar', decimals: 1, color: '#009650', defaultActive: true, sim: { min: 0, max: 2000, noise: 0.02 } },
-    Temperature_Setpoint:  { address: 'DB1000,REAL92',  unit: '°C', decimals: 1, color: '#004ea1', defaultActive: true, sim: { min: 0, max: 2000, start: 900, noise: 0.005, pull: 0.03 } },
+    Temperature_Setpoint:  { address: 'DB1000,REAL96',  unit: '°C', decimals: 1, color: '#004ea1', defaultActive: true, sim: { min: 0, max: 2000, start: 900, noise: 0.005, pull: 0.03 } },
     Top_Zone_A:  { address: 'DB1000,REAL12',  unit: '°C',    decimals: 1, color: '#b56400', defaultActive: true, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },
     Top_Zone_B:  { address: 'DB1000,REAL16',  unit: '°C',    decimals: 1, color: '#007998', defaultActive: true, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },
     Bottom_Zone_A:  { address: 'DB1000,REAL20',  unit: '°C',    decimals: 1, color: '#4d7100', defaultActive: true, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },

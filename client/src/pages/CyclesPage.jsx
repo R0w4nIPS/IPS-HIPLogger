@@ -110,9 +110,13 @@ export default function CyclesPage({ page, onNavigate, onSelectCycle }) {
     setAppliedRange(null);
   }
 
-  function csvUrl(from, to) {
+  function csvUrl(cycle, from, to) {
     const tagsParam = loggableTagNames.length ? `tags=${loggableTagNames.join(',')}&` : '';
-    return `/api/export.csv?${tagsParam}from=${from}&to=${to}`;
+    const meta = ['name', 'batchCode', 'operator']
+      .filter((f) => cycle[f])
+      .map((f) => `${f}=${encodeURIComponent(cycle[f])}`)
+      .join('&');
+    return `/api/export.csv?${tagsParam}from=${from}&to=${to}${meta ? `&${meta}` : ''}`;
   }
 
   // Reflect a keystroke immediately in the table; the actual save happens
@@ -286,7 +290,7 @@ export default function CyclesPage({ page, onNavigate, onSelectCycle }) {
                         </button>
                         <a
                           className="cycles-csv-btn"
-                          href={csvUrl(c.from, end)}
+                          href={csvUrl(c, c.from, end)}
                           title="Download this cycle as CSV"
                           onClick={(e) => e.stopPropagation()}
                         >

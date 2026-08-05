@@ -1,30 +1,33 @@
 import { useEffect, useMemo, useState } from 'react';
 import TrendChart from '../components/TrendChart.jsx';
+import TrendPicker from '../components/TrendPicker.jsx';
 import { formatDuration, formatTagName, formatDateTime } from '../lib/tagFormat.js';
 
-// Min/max over a {t,v}[] series, ignoring bad (null) reads.
+const SELECTED_TAGS_KEY = 's7report.selectedTags';
+
+// Max over a {t,v}[] series, ignoring bad (null) reads.
 function summarize(points) {
-  let min = null;
   let max = null;
   let n = 0;
   for (const p of points) {
     if (p.v == null) continue;
-    if (min == null || p.v < min) min = p.v;
     if (max == null || p.v > max) max = p.v;
     n++;
   }
-  return { min, max, count: n };
+  return { max, count: n };
 }
 
-// A single printable page for one cycle: metadata, a static trend chart of
-// the tags shown by default elsewhere in the app, and a min/max summary
-// table for every logged tag. "Print / Save as PDF" just calls the browser's
-// native print dialog -- no server-side PDF generation, so it works offline
-// and needs no extra dependency.
+// A single printable page for one cycle: metadata, a static trend chart,
+// and a max-value summary table -- both scoped to the tags picked via
+// "Select Trends". "Print / Save as PDF" just calls the browser's native
+// print dialog -- no server-side PDF generation, so it works offline and
+// needs no extra dependency.
 export default function CycleReportPage({ cycleId, onNavigate }) {
   const [cycle, setCycle] = useState(null); // {id, from, to} | null | 'error'
   const [tags, setTags] = useState({});
   const [series, setSeries] = useState(null); // name -> [{t,v}]
+  const [selected, setSelected] = useState({}); // name -> bool, which tags plot on the report chart
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +47,22 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
       if (cancelled) return;
       setCycle(cycleData);
       setTags(tagsData);
+
+      // Default to the same curated set the Trend page opens with
+      // (`defaultActive`), then layer in whatever was last chosen here.
+      let saved = null;
+      try {
+        saved = JSON.parse(localStorage.getItem(SELECTED_TAGS_KEY));
+      } catch {
+        /* ignore malformed/missing saved selection */
+      }
+      setSelected((prev) => {
+        const next = { ...prev };
+        for (const name of Object.keys(tagsData)) {
+          if (!(name in next)) next[name] = saved?.[name] ?? tagsData[name].defaultActive ?? true;
+        }
+        return next;
+      });
 
       const to = cycleData.to ?? Date.now();
       const loggable = Object.keys(tagsData).filter((name) => tagsData[name].trend !== false);
@@ -70,13 +89,29 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
     };
   }, [cycleId]);
 
-  // The chart shows only the tags marked `defaultActive` in config (the
-  // same curated set the Trend page opens with out of the box) -- plotting
-  // all ~25 logged tags on one shared axis would be unreadable.
-  const chartTagNames = useMemo(
-    () => Object.keys(tags).filter((name) => tags[name].trend !== false && tags[name].defaultActive !== false),
+  // Tags eligible to plot at all (same trend-logging gate used elsewhere),
+  // and which of those the user has chosen to actually show -- defaults to
+  // the curated `defaultActive` set so the report isn't a blank chart
+  // before the user's ever touched "Select Trends".
+  const trendableTags = useMemo(
+    () => Object.fromEntries(Object.entries(tags).filter(([, def]) => def.trend !== false)),
     [tags]
   );
+  const chartTagNames = useMemo(
+    () => Object.keys(trendableTags).filter((name) => selected[name]),
+    [trendableTags, selected]
+  );
+
+  // Persist the report's trend selection across reloads, same pattern as
+  // the Trend page.
+  useEffect(() => {
+    if (!Object.keys(selected).length) return;
+    try {
+      localStorage.setItem(SELECTED_TAGS_KEY, JSON.stringify(selected));
+    } catch {
+      /* storage unavailable (private mode, quota, etc.) -- not critical */
+    }
+  }, [selected]);
 
   const chartData = useMemo(() => {
     if (!cycle || cycle === 'error' || !series) return null;
@@ -94,12 +129,9 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
     };
   }, [cycle, series, chartTagNames, tags]);
 
-  // Every logged tag gets a stats row, not just the curated chart set --
-  // this table is the traceability record, so it should be complete.
-  const statsTagNames = useMemo(
-    () => Object.keys(tags).filter((name) => tags[name].trend !== false).sort(),
-    [tags]
-  );
+  // Stats table mirrors the chart's tag selection, in the same order
+  // they're listed in the "Select Trends" picker.
+  const statsTagNames = chartTagNames;
 
   if (cycle === 'error') {
     return (
@@ -125,6 +157,7 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
     <div className="report-page">
       <div className="report-toolbar no-print">
         <button onClick={() => onNavigate('/cycles')}>← Back to Cycles</button>
+        <button onClick={() => setPickerOpen(true)}>☰ Select Trends</button>
         <button onClick={() => window.print()}>🖶 Print / Save as PDF</button>
       </div>
 
@@ -185,7 +218,6 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
             <tr>
               <th>Tag</th>
               <th>Unit</th>
-              <th>Min</th>
               <th>Max</th>
             </tr>
           </thead>
@@ -193,13 +225,12 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
             {statsTagNames.map((name) => {
               const def = tags[name];
               const decimals = def.decimals ?? 1;
-              const { min, max, count } = summarize(series[name] || []);
+              const { max, count } = summarize(series[name] || []);
               const fmt = (v) => (v == null ? '–' : v.toFixed(decimals));
               return (
                 <tr key={name}>
                   <td>{formatTagName(name)}</td>
                   <td>{def.unit || ''}</td>
-                  <td>{count ? fmt(min) : '–'}</td>
                   <td>{count ? fmt(max) : '–'}</td>
                 </tr>
               );
@@ -209,6 +240,15 @@ export default function CycleReportPage({ cycleId, onNavigate }) {
       </section>
 
       <footer className="report-footer">Generated {formatDateTime(Date.now())}</footer>
+
+      {pickerOpen && (
+        <TrendPicker
+          tags={trendableTags}
+          selected={selected}
+          onChange={setSelected}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }

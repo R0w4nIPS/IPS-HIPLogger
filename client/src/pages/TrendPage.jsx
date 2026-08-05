@@ -36,6 +36,11 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
   // Tags marked `trend: false` server-side (db1001 cycle/status signals)
   // are excluded here entirely -- no tile, no picker entry, no chart line,
   // no history fetch. They're still live on the Dashboard via `latest`.
+  const windowLabel = useMemo(
+    () => WINDOWS.find((w) => w.seconds === windowSec)?.label ?? `${windowSec}s`,
+    [windowSec]
+  );
+
   const trendableTags = useMemo(
     () => Object.fromEntries(Object.entries(tags).filter(([, def]) => def.trend !== false)),
     [tags]
@@ -68,6 +73,31 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
   const [rangeFrom, setRangeFrom] = useState('');
   const [rangeTo, setRangeTo] = useState('');
 
+  // The currently-running cycle (if any), for the traceability strip below
+  // the top nav. Polled rather than pushed over the WebSocket -- cycle
+  // start/end is infrequent, so a 5 s poll (same cadence the Cycles page
+  // uses) is plenty.
+  const [runningCycle, setRunningCycle] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    async function poll() {
+      try {
+        const res = await fetch('/api/cycles?limit=1');
+        if (!res.ok || cancelled) return;
+        const [latest] = await res.json();
+        setRunningCycle(latest && latest.to == null ? latest : null);
+      } catch {
+        /* keep showing whatever was last known */
+      }
+    }
+    poll();
+    const id = setInterval(poll, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
   function enterPause() {
     pausedAtRef.current = Date.now();
     setPanMs(0);
@@ -82,18 +112,42 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
     setPaused(false);
   }
 
-  // Bound how far the paused window can be dragged: never past "now",
-  // and never further back than the data the client actually buffers.
-  // No-op while viewing a custom range -- panning it would need a new fetch.
+  // Clamp a proposed pan offset so the paused window never goes past "now"
+  // and never further back than the data the client actually buffers (24h).
+  function clampPanMs(prevPanMs, deltaMs) {
+    const now = Date.now();
+    const minTo = now - 24 * 3600 * 1000 + windowRef.current * 1000;
+    const proposedTo = pausedAtRef.current + prevPanMs + deltaMs;
+    const clampedTo = Math.min(Math.max(proposedTo, minTo), now);
+    return clampedTo - pausedAtRef.current;
+  }
+
+  // Drag-to-pan while paused. No-op while viewing a custom range -- panning
+  // it would need a new fetch.
   function handlePan(deltaMs) {
     if (usingCustomRange) return;
-    setPanMs((prev) => {
-      const now = Date.now();
-      const minTo = now - 24 * 3600 * 1000 + windowRef.current * 1000;
-      const proposedTo = pausedAtRef.current + prev + deltaMs;
-      const clampedTo = Math.min(Math.max(proposedTo, minTo), now);
-      return clampedTo - pausedAtRef.current;
-    });
+    setPanMs((prev) => clampPanMs(prev, deltaMs));
+  }
+
+  // Shift the whole trend window by `steps` selected-window-widths,
+  // left/right (dir -1 / +1). Freezes the view first if it's currently
+  // live. Leaving a custom range needs its own branch: `usingCustomRange`
+  // here is still the stale pre-update value, so it can't just delegate to
+  // handlePan (which would see the same stale flag and bail).
+  function shiftWindow(dir, steps = 1) {
+    const deltaMs = dir * steps * windowRef.current * 1000;
+    if (usingCustomRange) {
+      exitCustomRange();
+      pausedAtRef.current = Date.now();
+      setPaused(true);
+      setPanMs(clampPanMs(0, deltaMs));
+      return;
+    }
+    if (!paused) {
+      enterPause();
+      setPaused(true);
+    }
+    handlePan(deltaMs);
   }
 
   // ---- Jump to a specific date/time range -----------------------------------
@@ -287,6 +341,44 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
     <div className="app">
       <TopNav page={page} onNavigate={onNavigate} status={status} />
 
+      <div className="rangebar">
+        {runningCycle && (
+          <div className="cyclebar">
+            <span className="cycle-status running">Running</span>
+            <span className="cyclebar-item">
+              <span className="cyclebar-label">Name</span> {runningCycle.name || '—'}
+            </span>
+            <span className="cyclebar-item">
+              <span className="cyclebar-label">Batch Code</span> {runningCycle.batchCode || '—'}
+            </span>
+            <span className="cyclebar-item">
+              <span className="cyclebar-label">Operator</span> {runningCycle.operator || '—'}
+            </span>
+          </div>
+        )}
+
+        <form className="range-select" onSubmit={handleGoToRange}>
+          <input
+            type="datetime-local"
+            step="1"
+            value={rangeFrom}
+            onChange={(e) => setRangeFrom(e.target.value)}
+            aria-label="Range start"
+            required
+          />
+          <span className="range-sep">→</span>
+          <input
+            type="datetime-local"
+            step="1"
+            value={rangeTo}
+            onChange={(e) => setRangeTo(e.target.value)}
+            aria-label="Range end"
+            required
+          />
+          <button type="submit">Go</button>
+        </form>
+      </div>
+
       <div className="main-body">
         <aside className="tiles">
           <button
@@ -342,26 +434,40 @@ export default function TrendPage({ page, onNavigate, initialRange, onInitialRan
             </button>
           ))}
         </div>
-        <form className="range-select" onSubmit={handleGoToRange}>
-          <input
-            type="datetime-local"
-            step="1"
-            value={rangeFrom}
-            onChange={(e) => setRangeFrom(e.target.value)}
-            aria-label="Range start"
-            required
-          />
-          <span className="range-sep">→</span>
-          <input
-            type="datetime-local"
-            step="1"
-            value={rangeTo}
-            onChange={(e) => setRangeTo(e.target.value)}
-            aria-label="Range end"
-            required
-          />
-          <button type="submit">Go</button>
-        </form>
+        <div className="window-shift" role="group" aria-label="Shift trend window">
+          <button
+            type="button"
+            className="shift-btn"
+            onClick={() => shiftWindow(-1, 2)}
+            title={`Shift back 2x ${windowLabel}`}
+          >
+            ◀◀
+          </button>
+          <button
+            type="button"
+            className="shift-btn"
+            onClick={() => shiftWindow(-1)}
+            title={`Shift back ${windowLabel}`}
+          >
+            ◀
+          </button>
+          <button
+            type="button"
+            className="shift-btn"
+            onClick={() => shiftWindow(1)}
+            title={`Shift forward ${windowLabel}`}
+          >
+            ▶
+          </button>
+          <button
+            type="button"
+            className="shift-btn"
+            onClick={() => shiftWindow(1, 2)}
+            title={`Shift forward 2x ${windowLabel}`}
+          >
+            ▶▶
+          </button>
+        </div>
         {cursorToolbar.visible && (
           <div className="cursor-toolbar">
             <span className="cursor-dt">Δt {cursorToolbar.dtLabel}</span>

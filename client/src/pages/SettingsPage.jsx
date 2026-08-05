@@ -176,7 +176,7 @@ export default function SettingsPage({ page, onNavigate }) {
       <TopNav page={page} onNavigate={onNavigate} status={status} />
 
       <div className="settings-body">
-        <section className="settings-section">
+        <section className="settings-section settings-section--wide">
         <h2 className="dashboard-group-title">PLC Connection</h2>
 
         {!loaded ? (
@@ -191,7 +191,7 @@ export default function SettingsPage({ page, onNavigate }) {
               </p>
             )}
 
-            <form className="settings-form" onSubmit={handleSave}>
+            <form className="settings-form settings-form--row" onSubmit={handleSave}>
               <label>
                 <span>Host</span>
                 <input

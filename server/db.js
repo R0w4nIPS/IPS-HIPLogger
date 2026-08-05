@@ -46,6 +46,10 @@ class TrendDB {
         v   REAL                -- NULL for bad reads
       );
       CREATE INDEX IF NOT EXISTS idx_samples_tag_t ON samples (tag, t);
+      -- t alone (not just the (tag, t) composite above) so prune()'s
+      -- WHERE t < cutoff -- no tag filter -- can use an index instead of
+      -- scanning every row, every hour, forever.
+      CREATE INDEX IF NOT EXISTS idx_samples_t ON samples (t);
 
       CREATE TABLE IF NOT EXISTS cycles (
         id      INTEGER PRIMARY KEY AUTOINCREMENT,

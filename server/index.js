@@ -393,6 +393,14 @@ app.get('/api/export.csv', (req, res) => {
     ? Number(req.query.from)
     : to - Number(req.query.window || 3600) * 1000;
 
+  // Present only when exporting a single cycle from the Cycles page --
+  // names the file after the cycle and stamps its identifying info at the
+  // top of the CSV. A plain Trend-page export has none of these and keeps
+  // the old trend_<stamp>.csv filename with no metadata block.
+  const cycleName = (req.query.name || '').trim();
+  const batchCode = (req.query.batchCode || '').trim();
+  const operator = (req.query.operator || '').trim();
+
   db.flush(); // make sure queued samples are on disk before querying
 
   const sep = config.csv.separator;
@@ -410,10 +418,33 @@ app.get('/api/export.csv', (req, res) => {
       `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`
     );
   };
+  // Quote a free-text metadata cell if it contains the separator, a quote,
+  // or a newline -- unlike the numeric data cells below, these come from
+  // user-typed cycle fields and can contain anything.
+  const csvCell = (v) => (new RegExp(`["\r\n${sep}]`).test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  // Filenames can't contain / \ : * ? " < > | or control characters;
+  // collapse whitespace and drop anything left blank back to the old name.
+  const safeName = cycleName
+    .replace(/[\\/:*?"<>|\x00-\x1F]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+  const filenameBase = safeName || `trend_${stamp}`;
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="trend_${stamp}.csv"`);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${filenameBase.replace(/[^\x20-\x7E]/g, '_')}.csv"; ` +
+      `filename*=UTF-8''${encodeURIComponent(filenameBase)}.csv`
+  );
+
+  if (cycleName || batchCode || operator) {
+    res.write(['Cycle Name', csvCell(cycleName)].join(sep) + '\r\n');
+    res.write(['Batch Code', csvCell(batchCode)].join(sep) + '\r\n');
+    res.write(['Operator', csvCell(operator)].join(sep) + '\r\n');
+    res.write('\r\n');
+  }
 
   res.write(['timestamp_ms', 'timestamp', ...tags].join(sep) + '\r\n');
   for (const row of db.exportRows(tags, from, to)) {
