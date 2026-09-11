@@ -405,6 +405,130 @@ app.put('/api/settings/tags', (req, res) => {
   res.json({ tags: value, restartRequired: true });
 });
 
+// Zone slots that must name a real tag vs. slots that may be left blank to
+// omit that stat from the card entirely.
+const ZONE_REQUIRED_FIELDS = ['zoneATag', 'zoneBTag'];
+// voltageTag2/currentTag2/powerTag2/outputTag2: a second power module's
+// stats, for zones that have one -- rendered as a second row on the card
+// when any of the four is set (see ZONE_SECONDARY_SLOT_ROWS in
+// DashboardPage.jsx), otherwise left blank like every other optional slot.
+const ZONE_OPTIONAL_FIELDS = [
+  'setpointTag', 'activeTag',
+  'voltageTag', 'currentTag', 'powerTag', 'outputTag',
+  'voltageTag2', 'currentTag2', 'powerTag2', 'outputTag2',
+];
+
+function serializeZone(zone) {
+  const out = { name: zone.name };
+  for (const field of [...ZONE_REQUIRED_FIELDS, ...ZONE_OPTIONAL_FIELDS]) out[field] = zone[field] || '';
+  return out;
+}
+
+// /api/zones -- current heating zone card config, for the Dashboard to
+// render however many cards are configured (rather than a hardcoded pair).
+// This never touches the poller/tag list, so unlike tags it applies live --
+// no restart needed after a save.
+app.get('/api/zones', (_req, res) => {
+  res.json({ zones: config.zones.map(serializeZone) });
+});
+
+app.get('/api/settings/zones', (_req, res) => {
+  res.json({ zones: config.zones.map(serializeZone) });
+});
+
+function validateZonesPayload(body) {
+  const rows = body?.zones;
+  if (!Array.isArray(rows)) return { error: 'zones must be an array' };
+
+  const clean = [];
+  for (const row of rows) {
+    const name = String(row.name || '').trim();
+    if (!name) return { error: 'each zone needs a name' };
+
+    const zone = { name };
+    for (const field of ZONE_REQUIRED_FIELDS) {
+      const tag = String(row[field] || '').trim();
+      if (!tag) return { error: `${name}: ${field.replace('Tag', '')} is required` };
+      if (!config.tags[tag]) return { error: `${name}: unknown tag "${tag}"` };
+      zone[field] = tag;
+    }
+    for (const field of ZONE_OPTIONAL_FIELDS) {
+      const tag = String(row[field] || '').trim();
+      if (tag && !config.tags[tag]) return { error: `${name}: unknown tag "${tag}"` };
+      zone[field] = tag;
+    }
+    clean.push(zone);
+  }
+  return { value: clean };
+}
+
+// Persists to zones.json and updates config.zones in place. Takes effect
+// immediately -- the Dashboard re-fetches /api/zones on load, no server
+// restart required (unlike the tag list).
+app.put('/api/settings/zones', (req, res) => {
+  const { error, value } = validateZonesPayload(req.body);
+  if (error) return res.status(400).json({ error });
+
+  config.zones = value;
+  try {
+    fs.writeFileSync(path.join(__dirname, 'zones.json'), JSON.stringify(value, null, 2));
+  } catch (err) {
+    return res.status(500).json({ error: `failed to save zones.json: ${err.message}` });
+  }
+
+  res.json({ zones: value });
+});
+
+// The Dashboard's four small fixed-position tile groups -- only their tag
+// membership is editable; the keys, labels, and where each renders live in
+// DashboardPage.jsx.
+const DASHBOARD_GROUP_KEYS = ['pressures', 'cooling', 'vesselTemperatures', 'power'];
+
+app.get('/api/dashboard-groups', (_req, res) => {
+  res.json({ groups: config.dashboardGroups });
+});
+
+app.get('/api/settings/dashboard-groups', (_req, res) => {
+  res.json({ groups: config.dashboardGroups });
+});
+
+function validateDashboardGroupsPayload(body) {
+  const groups = body?.groups;
+  if (!groups || typeof groups !== 'object') return { error: 'groups must be an object' };
+
+  const clean = {};
+  for (const key of DASHBOARD_GROUP_KEYS) {
+    const list = groups[key];
+    if (!Array.isArray(list)) return { error: `${key} must be an array of tag names` };
+    const tags = [];
+    for (const raw of list) {
+      const tag = String(raw || '').trim();
+      if (!tag) continue;
+      if (!config.tags[tag]) return { error: `${key}: unknown tag "${tag}"` };
+      if (!tags.includes(tag)) tags.push(tag);
+    }
+    clean[key] = tags;
+  }
+  return { value: clean };
+}
+
+// Persists to dashboard.json and updates config.dashboardGroups in place.
+// Takes effect immediately -- the Dashboard re-fetches /api/dashboard-groups
+// on load, no server restart required.
+app.put('/api/settings/dashboard-groups', (req, res) => {
+  const { error, value } = validateDashboardGroupsPayload(req.body);
+  if (error) return res.status(400).json({ error });
+
+  config.dashboardGroups = value;
+  try {
+    fs.writeFileSync(path.join(__dirname, 'dashboard.json'), JSON.stringify(value, null, 2));
+  } catch (err) {
+    return res.status(500).json({ error: `failed to save dashboard.json: ${err.message}` });
+  }
+
+  res.json({ groups: value });
+});
+
 // /api/export.csv?tags=Pressure_bar,Flow_lpm&from=<ms>&to=<ms>
 // or             ?tags=...&window=3600 (seconds back from now)
 // Exports from SQLite, so the range can go back db.retentionDays.

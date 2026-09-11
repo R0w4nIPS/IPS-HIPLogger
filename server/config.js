@@ -23,6 +23,54 @@ const config = {
     timeout: 5000,
   },
 
+  // Furnace heating zone cards shown on the Dashboard. Each entry maps a
+  // card's fixed slots (Setpoint/Zone A/Zone B headline stats, an optional
+  // active-TC bool tag, and Voltage/Current/Power/Furnace Output detail
+  // stats for up to 2 power modules -- the *Tag2 fields render a second
+  // detail row when any of them is set) to tag names from `tags` below.
+  // All slots but zoneATag/zoneBTag are optional -- leave a field '' to
+  // omit that stat from the card. Editable from the Settings page (see
+  // /api/settings/zones); that editor is the source of truth once
+  // zones.json exists (see the loader below).
+  zones: [
+    {
+      name: 'Top Heating Zone',
+      setpointTag: 'Temperature_Setpoint',
+      zoneATag: 'Top_Zone_A',
+      zoneBTag: 'Top_Zone_B',
+      activeTag: 'TopZoneActiveTC',
+      voltageTag: 'Voltage_Top',
+      currentTag: 'Current_Top',
+      powerTag: 'Power_Top',
+      outputTag: 'Top_Furnace_Output',
+    },
+    {
+      name: 'Bottom Heating Zone',
+      setpointTag: 'Temperature_Setpoint',
+      zoneATag: 'Bottom_Zone_A',
+      zoneBTag: 'Bottom_Zone_B',
+      activeTag: 'BotZoneActiveTC',
+      voltageTag: 'Voltage_Bottom',
+      currentTag: 'Current_Bottom',
+      powerTag: 'Power_Bottom',
+      outputTag: 'Bottom_Furnace_Output',
+    },
+  ],
+
+  // Which tags appear in each of the Dashboard's small fixed-position
+  // groups -- Pressures (top-left), Cooling (bottom of page), and Vessel
+  // Temperatures + Power (Furnace section's side column). The four keys
+  // themselves, their labels, and where each renders are fixed in
+  // DashboardPage.jsx; only the tag list inside each is editable, from the
+  // Settings page (see /api/settings/dashboard-groups) -- that editor is the
+  // source of truth once dashboard.json exists (see the loader below).
+  dashboardGroups: {
+    pressures: ['Vessel_Pressure', 'Pressure_Setpoint', 'Bottle_Pressure', 'Vacuum_Pressure'],
+    cooling: ['Temp_Coolwater_Cover', 'Temp_Coolwater_Jacket', 'Temp_Coolwater_Top_In'],
+    vesselTemperatures: ['Temp_Outside_Heatshield', 'Temp_Vessel'],
+    power: ['Total_Power'],
+  },
+
   // Tag map: friendly name -> absolute S7 address.
   // Address syntax (nodes7): DB<n>,<TYPE><byteOffset>
   //   REAL   -> DB10,REAL0
@@ -266,6 +314,31 @@ try {
   if (savedTags && typeof savedTags === 'object') config.tags = savedTags;
 } catch {
   /* no tags.json yet, or it's unreadable -- the hardcoded tags above stand */
+}
+
+// Likewise for the Dashboard's heating zone cards (see the Settings page's
+// zone editor): a full array replace, same reasoning as tags.json -- once
+// saved, zones.json is the whole list going forward, so a removed zone
+// actually disappears instead of lingering merged in from the defaults.
+const zonesFile = path.join(__dirname, 'zones.json');
+try {
+  const savedZones = JSON.parse(fs.readFileSync(zonesFile, 'utf8'));
+  if (Array.isArray(savedZones)) config.zones = savedZones;
+} catch {
+  /* no zones.json yet, or it's unreadable -- the hardcoded zones above stand */
+}
+
+// Likewise for the Dashboard's Pressures/Cooling/Vessel Temperatures/Power
+// groups (see the Settings page's dashboard groups editor). A shallow merge
+// (not a full replace like zones/tags above) since the saved file only ever
+// contains the same four known keys -- there's no "removed key" case to
+// worry about losing.
+const dashboardGroupsFile = path.join(__dirname, 'dashboard.json');
+try {
+  const savedGroups = JSON.parse(fs.readFileSync(dashboardGroupsFile, 'utf8'));
+  if (savedGroups && typeof savedGroups === 'object') Object.assign(config.dashboardGroups, savedGroups);
+} catch {
+  /* no dashboard.json yet, or it's unreadable -- the hardcoded groups above stand */
 }
 
 module.exports = config;

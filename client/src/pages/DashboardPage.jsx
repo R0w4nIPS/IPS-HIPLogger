@@ -18,80 +18,115 @@ const CYCLE_MAIN_ITEMS = [
 // Remaining cycle tags, shown as plain tiles below the CycleCard.
 // TopZoneActiveTC/BotZoneActiveTC aren't listed here -- they're not shown as
 // their own tiles, only as the active-zone indicator on the heating zone
-// cards in Furnace (see HEATING_ZONES' activeTag below).
+// cards in Furnace (see each zone's activeTag, configured on the Settings
+// page and consumed in buildZoneCardProps below).
 const CYCLE_EXTRA_TAGS = ['LoggingOnOff', 'FurnaceOn', 'CoolingRunning'];
 
-// Rendered side by side with Cycle (Pressures left, Cycle right) to save
-// vertical space. `columns: 2` lays these out as fixed pairs (row-major)
-// instead of the default auto-fill grid -- order matters: [Vessel Pressure,
-// Setpoint] on row 1, [Bottle Pressure, Vacuum Pressure] on row 2.
-const PRESSURE_GROUP = {
-  label: 'Pressures',
-  columns: 2,
-  tags: ['Vessel_Pressure', 'Pressure_Setpoint', 'Bottle_Pressure', 'Vacuum_Pressure'],
-};
-
-// Rendered after the Furnace section.
-const GROUPS_AFTER_FURNACE = [
-  {
-    label: 'Cooling',
-    tags: ['Temp_Coolwater_Cover', 'Temp_Coolwater_Jacket', 'Temp_Coolwater_Top_In'],
-  },
+// The Dashboard's four small fixed-position tile groups -- label and where
+// each renders (Pressures: rendered side by side with Cycle, `columns: 2`
+// lays it out as fixed pairs (row-major) instead of the default auto-fill
+// grid; Cooling: after the Furnace section; Vessel Temperatures/Power:
+// Furnace's second column, alongside the heating zone cards) are fixed
+// here. Which tags populate each group's `key` is configurable from the
+// Settings page (see /api/dashboard-groups) rather than hardcoded.
+const PRESSURE_GROUP_DEF = { key: 'pressures', label: 'Pressures', columns: 2 };
+const COOLING_GROUP_DEF = { key: 'cooling', label: 'Cooling' };
+const FURNACE_SIDE_GROUP_DEFS = [
+  { key: 'vesselTemperatures', label: 'Vessel Temperatures' },
+  { key: 'power', label: 'Power' },
 ];
 
-// Rendered as Furnace's second column, alongside the heating zone cards.
-const FURNACE_SIDE_GROUPS = [
-  { label: 'Vessel Temperatures', tags: ['Temp_Outside_Heatshield', 'Temp_Vessel'] },
-  { label: 'Power', tags: ['Total_Power'] },
+// Each furnace heating zone card's fixed slots -> the labels shown on the
+// card. The actual tag feeding each slot is configurable from the Settings
+// page (see /api/zones) rather than hardcoded here -- this list only maps
+// slot -> display label and (for the two headline zone stats) whether it's
+// the zone-A/zone-B slot the active-TC indicator can point at.
+const ZONE_MAIN_SLOTS = [
+  { field: 'setpointTag', label: 'Setpoint' },
+  { field: 'zoneATag', label: 'Zone A' },
+  { field: 'zoneBTag', label: 'Zone B' },
+];
+// Row 1: the zone's (only, or first) power module. Row 2 is the same 4
+// stats for a second power module -- only some zones have one, so it's a
+// separate slot set (voltageTag2/currentTag2/powerTag2/outputTag2) rather
+// than a repeat count, and only renders at all when at least one of its
+// tags is actually configured.
+const ZONE_SECONDARY_SLOT_ROWS = [
+  [
+    { field: 'voltageTag', label: 'Voltage' },
+    { field: 'currentTag', label: 'Current' },
+    { field: 'powerTag', label: 'Power' },
+    { field: 'outputTag', label: 'Furnace Output' },
+  ],
+  [
+    { field: 'voltageTag2', label: 'Voltage' },
+    { field: 'currentTag2', label: 'Current' },
+    { field: 'powerTag2', label: 'Power' },
+    { field: 'outputTag2', label: 'Furnace Output' },
+  ],
 ];
 
-// Load_1/Load_2 aren't shown on the dashboard; still available on the Trend
-// page's tile picker and chart.
+// Builds a HeatingZoneCard's `main`/`secondaryRows`/`activeIndex` props from
+// a zone config + the live tag/latest maps, skipping any slot left blank or
+// whose tag doesn't exist (an empty secondary row is dropped entirely, so a
+// zone with no second power module just doesn't get a second row).
+// `activeIndex` is derived from where zoneATag/zoneBTag actually landed in
+// `main` (not assumed to be fixed positions), since setpointTag being blank
+// shifts everything up by one.
+function buildZoneCardProps(zone, tags, latest) {
+  const main = [];
+  let zoneAIndex = -1;
+  let zoneBIndex = -1;
+  for (const { field, label } of ZONE_MAIN_SLOTS) {
+    const tag = zone[field];
+    if (!tag || !tags[tag]) continue;
+    if (field === 'zoneATag') zoneAIndex = main.length;
+    if (field === 'zoneBTag') zoneBIndex = main.length;
+    main.push({ tag, label });
+  }
 
-// Each furnace heating zone shows its target setpoint and two zone
-// temperatures as equally-prominent headline numbers (setpoint first),
-// with voltage/current/power/furnace output as smaller supporting detail
-// below. `activeTag` (0 = Zone A, 1 = Zone B) marks which of the main
-// Zone A/B stats is the zone's currently active thermocouple -- note this
-// is an index into `main`, so it must stay in sync with Zone A/B's position
-// there (both currently at index 1 and 2, after the leading Setpoint).
-const HEATING_ZONES = [
-  {
-    label: 'Top Heating Zone',
-    activeTag: 'TopZoneActiveTC',
-    main: [
-      { tag: 'Temperature_Setpoint', label: 'Setpoint' },
-      { tag: 'Top_Zone_A', label: 'Zone A' },
-      { tag: 'Top_Zone_B', label: 'Zone B' },
-    ],
-    secondary: [
-      { tag: 'Voltage_Top', label: 'Voltage' },
-      { tag: 'Current_Top', label: 'Current' },
-      { tag: 'Power_Top', label: 'Power' },
-      { tag: 'Top_Furnace_Output', label: 'Furnace Output' },
-    ],
-  },
-  {
-    label: 'Bottom Heating Zone',
-    activeTag: 'BotZoneActiveTC',
-    main: [
-      { tag: 'Temperature_Setpoint', label: 'Setpoint' },
-      { tag: 'Bottom_Zone_A', label: 'Zone A' },
-      { tag: 'Bottom_Zone_B', label: 'Zone B' },
-    ],
-    secondary: [
-      { tag: 'Voltage_Bottom', label: 'Voltage' },
-      { tag: 'Current_Bottom', label: 'Current' },
-      { tag: 'Power_Bottom', label: 'Power' },
-      { tag: 'Bottom_Furnace_Output', label: 'Furnace Output' },
-    ],
-  },
-];
+  const secondaryRows = ZONE_SECONDARY_SLOT_ROWS.map((slots) =>
+    slots.filter(({ field }) => zone[field] && tags[zone[field]]).map(({ field, label }) => ({ tag: zone[field], label }))
+  ).filter((row) => row.length);
+
+  const activeTC = zone.activeTag ? latest[zone.activeTag] : undefined;
+  const activeIndex = activeTC == null ? -1 : activeTC === 1 ? zoneBIndex : zoneAIndex;
+
+  return { main, secondaryRows, activeIndex };
+}
 
 export default function DashboardPage({ page, onNavigate }) {
   const [tags, setTags] = useState({});     // name -> {unit, decimals, color}
   const [latest, setLatest] = useState({}); // name -> value
   const [status, setStatus] = useState('connecting');
+  const [zones, setZones] = useState([]);   // heating zone card config, from Settings
+  const [groups, setGroups] = useState({}); // pressures/cooling/vesselTemperatures/power -> tag names, from Settings
+
+  // Zone card + tile group config is edited on the Settings page and
+  // applies live (no server restart), so a plain fetch-on-load is enough --
+  // no need to push either over the WebSocket alongside tags/samples.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/zones')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !cancelled) setZones(data.zones);
+      })
+      .catch(() => {
+        /* leave zones empty -- the Furnace section just shows no cards */
+      });
+    fetch('/api/dashboard-groups')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !cancelled) setGroups(data.groups);
+      })
+      .catch(() => {
+        /* leave groups empty -- Pressures/Cooling/Vessel Temperatures/Power just show no tiles */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // ---- WebSocket live feed ---------------------------------------------
   // Only current values are needed here (no chart), so this connection
@@ -133,13 +168,13 @@ export default function DashboardPage({ page, onNavigate }) {
 
   const haveTags = Object.keys(tags).length > 0;
 
-  function renderGroup(g) {
-    const groupTags = g.tags.filter((name) => tags[name]);
+  function renderGroup({ key, label, columns }) {
+    const groupTags = (groups[key] || []).filter((name) => tags[name]);
     if (!groupTags.length) return null;
-    const gridClass = g.columns === 2 ? 'dashboard-grid dashboard-grid-2col' : 'dashboard-grid';
+    const gridClass = columns === 2 ? 'dashboard-grid dashboard-grid-2col' : 'dashboard-grid';
     return (
-      <section key={g.label} className="dashboard-group">
-        <h2 className="dashboard-group-title">{g.label}</h2>
+      <section key={key} className="dashboard-group">
+        <h2 className="dashboard-group-title">{label}</h2>
         <div className={gridClass}>
           {groupTags.map((name) => (
             <ValueTile key={name} name={name} def={tags[name]} value={latest[name]} enabled readOnly />
@@ -149,12 +184,12 @@ export default function DashboardPage({ page, onNavigate }) {
     );
   }
 
-  function renderSubGroup(g) {
-    const groupTags = g.tags.filter((name) => tags[name]);
+  function renderSubGroup({ key, label }) {
+    const groupTags = (groups[key] || []).filter((name) => tags[name]);
     if (!groupTags.length) return null;
     return (
-      <div key={g.label} className="furnace-subgroup">
-        <h3 className="dashboard-subgroup-title">{g.label}</h3>
+      <div key={key} className="furnace-subgroup">
+        <h3 className="dashboard-subgroup-title">{label}</h3>
         <div className="dashboard-grid">
           {groupTags.map((name) => (
             <ValueTile key={name} name={name} def={tags[name]} value={latest[name]} enabled readOnly />
@@ -172,7 +207,7 @@ export default function DashboardPage({ page, onNavigate }) {
 
       <div className="dashboard-body">
         <div className="dashboard-two-col">
-          {renderGroup(PRESSURE_GROUP)}
+          {renderGroup(PRESSURE_GROUP_DEF)}
 
           {haveTags && (
             <section className="dashboard-group dashboard-col-grow">
@@ -207,31 +242,31 @@ export default function DashboardPage({ page, onNavigate }) {
             <div className="pressure-width-grid">
               <div className="pressure-width-span">
                 <div className="zone-card-row">
-                  {HEATING_ZONES.map((zone) => {
-                    const activeTC = latest[zone.activeTag];
-                    // Zone A/B sit at main[1]/main[2] (index 0 is the setpoint).
+                  {zones.map((zone) => {
+                    const { main, secondaryRows, activeIndex } = buildZoneCardProps(zone, tags, latest);
+                    if (!main.length) return null;
                     return (
                       <HeatingZoneCard
-                        key={zone.label}
-                        label={zone.label}
+                        key={zone.name}
+                        label={zone.name}
                         tags={tags}
                         latest={latest}
-                        main={zone.main}
-                        secondary={zone.secondary}
-                        activeIndex={activeTC == null ? -1 : activeTC === 1 ? 2 : 1}
+                        main={main}
+                        secondaryRows={secondaryRows}
+                        activeIndex={activeIndex}
                       />
                     );
                   })}
                 </div>
               </div>
               <div className="furnace-col-side">
-                {FURNACE_SIDE_GROUPS.map(renderSubGroup)}
+                {FURNACE_SIDE_GROUP_DEFS.map(renderSubGroup)}
               </div>
             </div>
           </section>
         )}
 
-        {GROUPS_AFTER_FURNACE.map(renderGroup)}
+        {renderGroup(COOLING_GROUP_DEF)}
       </div>
     </div>
   );

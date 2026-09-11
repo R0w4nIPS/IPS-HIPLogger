@@ -24,6 +24,61 @@ function blankTagRow(existingCount) {
   };
 }
 
+// Fixed slots a heating zone card can show -- mirrors ZONE_MAIN_SLOTS /
+// ZONE_SECONDARY_SLOT_ROWS[0] in DashboardPage.jsx. zoneATag/zoneBTag are
+// the only required ones; everything else can be left blank to omit that
+// stat.
+const ZONE_FIELDS = [
+  { field: 'setpointTag', label: 'Setpoint', required: false },
+  { field: 'zoneATag', label: 'Zone A', required: true },
+  { field: 'zoneBTag', label: 'Zone B', required: true },
+  { field: 'activeTag', label: 'Active Zone Indicator', required: false, kind: 'bool' },
+  { field: 'voltageTag', label: 'Voltage', required: false },
+  { field: 'currentTag', label: 'Current', required: false },
+  { field: 'powerTag', label: 'Power', required: false },
+  { field: 'outputTag', label: 'Furnace Output', required: false },
+];
+
+// A second power module's stats -- mirrors ZONE_SECONDARY_SLOT_ROWS[1] in
+// DashboardPage.jsx. Entirely optional: only zones with a second module
+// need these filled in, and the card only grows a second detail row once
+// at least one of them is set.
+const ZONE_FIELDS_2 = [
+  { field: 'voltageTag2', label: 'Voltage', required: false },
+  { field: 'currentTag2', label: 'Current', required: false },
+  { field: 'powerTag2', label: 'Power', required: false },
+  { field: 'outputTag2', label: 'Furnace Output', required: false },
+];
+
+function blankZoneRow() {
+  return {
+    name: '',
+    setpointTag: '',
+    zoneATag: '',
+    zoneBTag: '',
+    activeTag: '',
+    voltageTag: '',
+    currentTag: '',
+    powerTag: '',
+    outputTag: '',
+    voltageTag2: '',
+    currentTag2: '',
+    powerTag2: '',
+    outputTag2: '',
+  };
+}
+
+// The Dashboard's four small fixed-position tile groups -- mirrors
+// PRESSURE_GROUP_DEF/COOLING_GROUP_DEF/FURNACE_SIDE_GROUP_DEFS in
+// DashboardPage.jsx. Only tag membership is editable here; the label and
+// where each renders on the Dashboard are fixed.
+const DASHBOARD_GROUP_DEFS = [
+  { key: 'pressures', label: 'Pressures' },
+  { key: 'cooling', label: 'Cooling' },
+  { key: 'vesselTemperatures', label: 'Vessel Temperatures' },
+  { key: 'power', label: 'Power' },
+];
+
 // PLC connection settings, editable at runtime instead of only via
 // config.js -- persisted server-side to settings.json (see server/config.js)
 // so an operator can point at a different CPU without touching code.
@@ -37,6 +92,13 @@ export default function SettingsPage({ page, onNavigate }) {
 
   const [tagRows, setTagRows] = useState(null); // null while loading
   const [tagsSaveState, setTagsSaveState] = useState(null); // null | 'saving' | {ok, error?, restartRequired?}
+
+  const [allTags, setAllTags] = useState({}); // name -> {kind, ...}, for the zone tag dropdowns
+  const [zoneRows, setZoneRows] = useState(null); // null while loading
+  const [zonesSaveState, setZonesSaveState] = useState(null); // null | 'saving' | {ok, error?}
+
+  const [groupRows, setGroupRows] = useState(null); // null while loading; {pressures: [...], cooling: [...], ...}
+  const [groupsSaveState, setGroupsSaveState] = useState(null); // null | 'saving' | {ok, error?}
 
   useEffect(() => {
     let cancelled = false;
@@ -67,6 +129,54 @@ export default function SettingsPage({ page, onNavigate }) {
       .catch(() => {
         /* leave tagRows null -- the section shows "Loading..." indefinitely,
            which is at least honest about not knowing the current list */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Every tag (including the db1001 status/bool tags, needed for the
+  // "Active Zone Indicator" dropdown) -- unlike tagRows above, which only
+  // covers the editable analog tags.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/tags')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !cancelled) setAllTags(data);
+      })
+      .catch(() => {
+        /* leave allTags empty -- zone dropdowns just show no options */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/settings/zones')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !cancelled) setZoneRows(data.zones);
+      })
+      .catch(() => {
+        /* leave zoneRows null -- the section shows "Loading..." indefinitely */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/settings/dashboard-groups')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !cancelled) setGroupRows(data.groups);
+      })
+      .catch(() => {
+        /* leave groupRows null -- the section shows "Loading..." indefinitely */
       });
     return () => {
       cancelled = true;
@@ -173,6 +283,76 @@ export default function SettingsPage({ page, onNavigate }) {
       setTagsSaveState({ ok: true, restartRequired: data.restartRequired });
     } catch {
       setTagsSaveState({ ok: false, error: 'Request failed' });
+    }
+  }
+
+  function updateZoneField(index, field, value) {
+    setZoneRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+    setZonesSaveState(null);
+  }
+
+  function addZoneRow() {
+    setZoneRows((prev) => [...prev, blankZoneRow()]);
+    setZonesSaveState(null);
+  }
+
+  function removeZoneRow(index) {
+    const row = zoneRows[index];
+    if (row.name && !window.confirm(`Remove the "${row.name}" card from the Dashboard?`)) return;
+    setZoneRows((prev) => prev.filter((_, i) => i !== index));
+    setZonesSaveState(null);
+  }
+
+  async function handleSaveZones(e) {
+    e.preventDefault();
+    setZonesSaveState('saving');
+    try {
+      const res = await fetch('/api/settings/zones', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ zones: zoneRows }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setZonesSaveState({ ok: false, error: data.error || 'Save failed' });
+        return;
+      }
+      setZoneRows(data.zones);
+      setZonesSaveState({ ok: true });
+    } catch {
+      setZonesSaveState({ ok: false, error: 'Request failed' });
+    }
+  }
+
+  function addGroupTag(key, tagName) {
+    if (!tagName) return;
+    setGroupRows((prev) => ({ ...prev, [key]: [...prev[key], tagName] }));
+    setGroupsSaveState(null);
+  }
+
+  function removeGroupTag(key, index) {
+    setGroupRows((prev) => ({ ...prev, [key]: prev[key].filter((_, i) => i !== index) }));
+    setGroupsSaveState(null);
+  }
+
+  async function handleSaveGroups(e) {
+    e.preventDefault();
+    setGroupsSaveState('saving');
+    try {
+      const res = await fetch('/api/settings/dashboard-groups', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groups: groupRows }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGroupsSaveState({ ok: false, error: data.error || 'Save failed' });
+        return;
+      }
+      setGroupRows(data.groups);
+      setGroupsSaveState({ ok: true });
+    } catch {
+      setGroupsSaveState({ ok: false, error: 'Request failed' });
     }
   }
 
@@ -378,6 +558,163 @@ export default function SettingsPage({ page, onNavigate }) {
                   {tagsSaveState.ok
                     ? '✓ Saved — restart the server for the tag list to take effect'
                     : `✗ ${tagsSaveState.error}`}
+                </p>
+              )}
+            </form>
+          )}
+        </section>
+
+        <section className="settings-section settings-section--wide">
+          <h2 className="dashboard-group-title">Furnace Heating Zone Cards</h2>
+
+          {zoneRows == null ? (
+            <p className="cycles-empty">Loading…</p>
+          ) : (
+            <form onSubmit={handleSaveZones}>
+              <p className="settings-note">
+                Controls how many heating zone cards show on the Dashboard and which tags feed each one.
+                Zone A and Zone B are required; every other field can be left blank to omit that stat from
+                the card. Takes effect immediately, no restart needed.
+              </p>
+
+              {zoneRows.map((row, i) => (
+                <fieldset key={i} className="zone-editor-card">
+                  <div className="zone-editor-head">
+                    <input
+                      type="text"
+                      className="zone-editor-name"
+                      value={row.name}
+                      onChange={(e) => updateZoneField(i, 'name', e.target.value)}
+                      placeholder="Zone name (e.g. Top Heating Zone)"
+                      required
+                    />
+                    <button type="button" className="tags-row-delete" onClick={() => removeZoneRow(i)}>
+                      ✕ Remove
+                    </button>
+                  </div>
+
+                  <div className="zone-editor-fields">
+                    {ZONE_FIELDS.map(({ field, label, required, kind }) => (
+                      <label key={field}>
+                        <span>
+                          {label}
+                          {required ? ' *' : ''}
+                        </span>
+                        <select
+                          value={row[field]}
+                          onChange={(e) => updateZoneField(i, field, e.target.value)}
+                          required={required}
+                        >
+                          <option value="">{required ? '— select a tag —' : '— none —'}</option>
+                          {Object.entries(allTags)
+                            .filter(([, def]) => (kind === 'bool' ? def.kind === 'bool' : !def.kind))
+                            .map(([name]) => (
+                              <option key={name} value={name}>
+                                {name}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="zone-editor-subhead">Power Module 2 (optional)</div>
+                  <div className="zone-editor-fields">
+                    {ZONE_FIELDS_2.map(({ field, label }) => (
+                      <label key={field}>
+                        <span>{label}</span>
+                        <select value={row[field]} onChange={(e) => updateZoneField(i, field, e.target.value)}>
+                          <option value="">— none —</option>
+                          {Object.entries(allTags)
+                            .filter(([, def]) => !def.kind)
+                            .map(([name]) => (
+                              <option key={name} value={name}>
+                                {name}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+
+              <div className="settings-actions">
+                <button type="button" className="tags-add-btn" onClick={addZoneRow}>
+                  + Add Zone
+                </button>
+                <button type="submit" disabled={zonesSaveState === 'saving'}>
+                  {zonesSaveState === 'saving' ? 'Saving…' : 'Save Zones'}
+                </button>
+              </div>
+
+              {zonesSaveState && zonesSaveState !== 'saving' && (
+                <p className={`settings-result ${zonesSaveState.ok ? 'ok' : 'bad'}`}>
+                  {zonesSaveState.ok ? '✓ Saved' : `✗ ${zonesSaveState.error}`}
+                </p>
+              )}
+            </form>
+          )}
+        </section>
+
+        <section className="settings-section settings-section--wide">
+          <h2 className="dashboard-group-title">Dashboard Tile Groups</h2>
+
+          {groupRows == null ? (
+            <p className="cycles-empty">Loading…</p>
+          ) : (
+            <form onSubmit={handleSaveGroups}>
+              <p className="settings-note">
+                Controls which readings show in the Pressures, Cooling, Vessel Temperatures, and Power
+                groups on the Dashboard. Takes effect immediately, no restart needed.
+              </p>
+
+              <div className="group-editor-grid">
+                {DASHBOARD_GROUP_DEFS.map(({ key, label }) => {
+                  const rowTags = groupRows[key] || [];
+                  const available = Object.entries(allTags).filter(
+                    ([name, def]) => !def.kind && !rowTags.includes(name)
+                  );
+                  return (
+                    <fieldset key={key} className="group-editor-card">
+                      <div className="group-editor-title">{label}</div>
+                      <ul className="group-editor-list">
+                        {rowTags.map((name, i) => (
+                          <li key={name}>
+                            <span>{name}</span>
+                            <button type="button" className="tags-row-delete" onClick={() => removeGroupTag(key, i)}>
+                              ✕
+                            </button>
+                          </li>
+                        ))}
+                        {!rowTags.length && <li className="group-editor-empty">No readings selected</li>}
+                      </ul>
+                      <select
+                        value=""
+                        onChange={(e) => addGroupTag(key, e.target.value)}
+                        disabled={!available.length}
+                      >
+                        <option value="">+ Add reading…</option>
+                        {available.map(([name]) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                  );
+                })}
+              </div>
+
+              <div className="settings-actions">
+                <button type="submit" disabled={groupsSaveState === 'saving'}>
+                  {groupsSaveState === 'saving' ? 'Saving…' : 'Save Dashboard Groups'}
+                </button>
+              </div>
+
+              {groupsSaveState && groupsSaveState !== 'saving' && (
+                <p className={`settings-result ${groupsSaveState.ok ? 'ok' : 'bad'}`}>
+                  {groupsSaveState.ok ? '✓ Saved' : `✗ ${groupsSaveState.error}`}
                 </p>
               )}
             </form>
