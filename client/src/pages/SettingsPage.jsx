@@ -20,6 +20,7 @@ function blankTagRow(existingCount) {
     decimals: 1,
     color: NEW_TAG_COLORS[existingCount % NEW_TAG_COLORS.length],
     defaultActive: true,
+    logIntervalSec: 0,
   };
 }
 
@@ -156,7 +157,11 @@ export default function SettingsPage({ page, onNavigate }) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tags: tagRows.map((row) => ({ ...row, decimals: Number(row.decimals) })),
+          tags: tagRows.map((row) => ({
+            ...row,
+            decimals: Number(row.decimals),
+            logIntervalSec: Number(row.logIntervalSec) || 0,
+          })),
         }),
       });
       const data = await res.json();
@@ -283,6 +288,7 @@ export default function SettingsPage({ page, onNavigate }) {
                     <th>Decimals</th>
                     <th>Color</th>
                     <th>Default Active</th>
+                    <th>Log Every (s)</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -336,6 +342,16 @@ export default function SettingsPage({ page, onNavigate }) {
                           type="checkbox"
                           checked={row.defaultActive}
                           onChange={(e) => updateTagField(i, 'defaultActive', e.target.checked)}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={row.logIntervalSec ?? 0}
+                          onChange={(e) => updateTagField(i, 'logIntervalSec', e.target.value)}
+                          min="0"
+                          step="1"
+                          title="Minimum seconds between values written to trend.db. 0 = every poll tick (the live chart always updates every tick either way)."
                         />
                       </td>
                       <td>

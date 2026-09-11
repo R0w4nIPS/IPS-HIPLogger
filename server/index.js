@@ -95,14 +95,25 @@ wss.on('connection', (ws) => {
 // regardless -- only disk persistence is skipped while the tag reads 0.
 let loggingEnabled = !config.loggingGateTag;
 
+// Last sample time actually written to SQLite, per tag -- used to thin out
+// disk writes for tags with `logIntervalSec` set (see config.js). Reset
+// whenever a cycle starts so the first sample of each cycle always lands,
+// rather than possibly being skipped because of a stale timestamp from the
+// previous cycle.
+const lastLoggedAt = {};
+
 poller.on('sample', (sample) => {
   const gateTag = config.loggingGateTag;
   if (gateTag && gateTag in sample.values) {
     const next = sample.values[gateTag] === 1;
     if (next !== loggingEnabled) {
       console.log(`[db] logging ${next ? 'enabled' : 'disabled'} (${gateTag})`);
-      if (next) db.startCycle(sample.t);
-      else db.endCycle(sample.t);
+      if (next) {
+        db.startCycle(sample.t);
+        for (const name of Object.keys(lastLoggedAt)) delete lastLoggedAt[name];
+      } else {
+        db.endCycle(sample.t);
+      }
     }
     loggingEnabled = next;
   }
@@ -110,10 +121,18 @@ poller.on('sample', (sample) => {
   buffer.push(sample);
   if (loggingEnabled) {
     // Tags marked `log: false` (e.g. db1001 cycle/status signals) never hit
-    // SQLite even while logging is otherwise on.
+    // SQLite even while logging is otherwise on. Tags with `logIntervalSec`
+    // set are thinned to that cadence instead of every poll tick.
     const loggableValues = {};
     for (const [name, v] of Object.entries(sample.values)) {
-      if (config.tags[name]?.log !== false) loggableValues[name] = v;
+      const def = config.tags[name];
+      if (def?.log === false) continue;
+      const intervalMs = (def?.logIntervalSec || 0) * 1000;
+      if (intervalMs > 0 && lastLoggedAt[name] !== undefined && sample.t - lastLoggedAt[name] < intervalMs) {
+        continue;
+      }
+      lastLoggedAt[name] = sample.t;
+      loggableValues[name] = v;
     }
     db.push({ t: sample.t, values: loggableValues });
   }
@@ -296,6 +315,7 @@ function serializeTagRow(name, def) {
     decimals: def.decimals ?? 1,
     color: def.color || '#666666',
     defaultActive: def.defaultActive !== false,
+    logIntervalSec: def.logIntervalSec || 0,
   };
 }
 
@@ -316,6 +336,10 @@ function validateTagsPayload(body, preservedNames) {
     seen.add(name);
     if (!address) return { error: `${name}: address is required` };
     const decimals = Number(row.decimals);
+    const logIntervalSec = Number(row.logIntervalSec);
+    if (!Number.isFinite(logIntervalSec) || logIntervalSec < 0) {
+      return { error: `${name}: log interval must be a non-negative number of seconds` };
+    }
     clean.push({
       name,
       originalName: row.originalName ? String(row.originalName).trim() : null,
@@ -324,6 +348,7 @@ function validateTagsPayload(body, preservedNames) {
       decimals: Number.isFinite(decimals) ? decimals : 1,
       color: String(row.color || '#666666'),
       defaultActive: row.defaultActive !== false,
+      logIntervalSec,
     });
   }
   return { value: clean };
@@ -366,6 +391,7 @@ app.put('/api/settings/tags', (req, res) => {
       decimals: row.decimals,
       color: row.color,
       defaultActive: row.defaultActive,
+      logIntervalSec: row.logIntervalSec || undefined,
     };
   }
 

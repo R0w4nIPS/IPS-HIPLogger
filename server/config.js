@@ -38,6 +38,11 @@ const config = {
   // the "Select Trends" picker in the UI, their choice is remembered in that
   // browser (localStorage) and takes over from this default going forward.
   // Set to `false` for tags that should start hidden until picked.
+  // `logIntervalSec` (optional, default 0 = every sample): thins out SQLite
+  // writes for slow-moving tags (e.g. cooling water temps) that don't need
+  // 1 Hz resolution on disk. The tag still updates live every poll tick for
+  // the RAM buffer/WebSocket/chart -- this only skips samples closer than
+  // `logIntervalSec` seconds to the last one actually written to trend.db.
   tags: {
 Pressure_Setpoint:  { address: 'DB1000,REAL92',  unit: 'bar', decimals: 1, color: '#ac3500', defaultActive: true, sim: { min: 0, max: 2000, start: 900, noise: 0.005, pull: 0.03 } },
     Vessel_Pressure:   { address: 'DB1000,REAL0',  unit: 'bar', decimals: 1, color: '#863ca4', defaultActive: true, sim: { min: 0, max: 2000, noise: 0.03 } },
@@ -50,9 +55,9 @@ Pressure_Setpoint:  { address: 'DB1000,REAL92',  unit: 'bar', decimals: 1, color
     Bottom_Zone_B:  { address: 'DB1000,REAL24',  unit: '°C',    decimals: 1, color: '#009879', defaultActive: true, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },
     Load_1:  { address: 'DB1000,REAL28',  unit: '°C',    decimals: 1, color: '#ae3200', defaultActive: false, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },
     Load_2:  { address: 'DB1000,REAL32',  unit: '°C',    decimals: 1, color: '#4074dd', defaultActive: false, sim: { min: 0, max: 2000, start: 180, noise: 0.01, pull: 0.01 } },
-    Temp_Coolwater_Cover:  { address: 'DB1000,REAL36',  unit: '°C',    decimals: 1, color: '#af2938', defaultActive: false, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
-    Temp_Coolwater_Jacket:  { address: 'DB1000,REAL40',  unit: '°C',    decimals: 1, color: '#a44100', defaultActive: false, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
-    Temp_Coolwater_Top_In:  { address: 'DB1000,REAL44',  unit: '°C',    decimals: 1, color: '#006fb0', defaultActive: false, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
+    Temp_Coolwater_Cover:  { address: 'DB1000,REAL36',  unit: '°C',    decimals: 1, color: '#af2938', defaultActive: false, logIntervalSec: 10, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
+    Temp_Coolwater_Jacket:  { address: 'DB1000,REAL40',  unit: '°C',    decimals: 1, color: '#a44100', defaultActive: false, logIntervalSec: 10, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
+    Temp_Coolwater_Top_In:  { address: 'DB1000,REAL44',  unit: '°C',    decimals: 1, color: '#006fb0', defaultActive: false, logIntervalSec: 10, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
     Temp_Outside_Heatshield:  { address: 'DB1000,REAL48',  unit: '°C',    decimals: 1, color: '#c84368', defaultActive: false, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
     Temp_Vessel:  { address: 'DB1000,REAL52',  unit: '°C',    decimals: 1, color: '#007a12', defaultActive: false, sim: { min: 0, max: 200, start: 180, noise: 0.01, pull: 0.01 } },
     Voltage_Top:  { address: 'DB1000,REAL56',  unit: 'V',    decimals: 1, color: '#6f67da', defaultActive: false, sim: { min: 0, max: 400, start: 180, noise: 0.01, pull: 0.01 } },
