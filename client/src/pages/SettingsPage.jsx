@@ -24,6 +24,16 @@ function blankTagRow(existingCount) {
   };
 }
 
+function blankStatusTagRow() {
+  return {
+    name: '',
+    originalName: null,
+    address: '',
+    kind: 'bool',
+    defaultActive: false,
+  };
+}
+
 // Fixed slots a heating zone card can show -- mirrors ZONE_MAIN_SLOTS /
 // ZONE_SECONDARY_SLOT_ROWS[0] in DashboardPage.jsx. zoneATag/zoneBTag are
 // the only required ones; everything else can be left blank to omit that
@@ -90,8 +100,13 @@ export default function SettingsPage({ page, onNavigate }) {
   const [testState, setTestState] = useState(null); // null | 'testing' | {ok, error?}
   const [saveState, setSaveState] = useState(null); // null | 'saving' | {ok, error?}
 
+  const [restartState, setRestartState] = useState(null); // null | 'restarting' | {ok, error?}
+
   const [tagRows, setTagRows] = useState(null); // null while loading
   const [tagsSaveState, setTagsSaveState] = useState(null); // null | 'saving' | {ok, error?, restartRequired?}
+
+  const [statusTagRows, setStatusTagRows] = useState(null); // null while loading
+  const [statusTagsSaveState, setStatusTagsSaveState] = useState(null); // null | 'saving' | {ok, error?, restartRequired?}
 
   const [allTags, setAllTags] = useState({}); // name -> {kind, ...}, for the zone tag dropdowns
   const [zoneRows, setZoneRows] = useState(null); // null while loading
@@ -129,6 +144,22 @@ export default function SettingsPage({ page, onNavigate }) {
       .catch(() => {
         /* leave tagRows null -- the section shows "Loading..." indefinitely,
            which is at least honest about not knowing the current list */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/settings/status-tags')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data || cancelled) return;
+        setStatusTagRows(data.tags.map((t) => ({ ...t, originalName: t.name })));
+      })
+      .catch(() => {
+        /* leave statusTagRows null -- the section shows "Loading..." indefinitely */
       });
     return () => {
       cancelled = true;
@@ -240,6 +271,45 @@ export default function SettingsPage({ page, onNavigate }) {
     }
   }
 
+  // Tag/config edits above are written to disk immediately but only take
+  // effect on the next process start, so this actually respawns the
+  // server process (see the /api/settings/restart handler) rather than
+  // just being a UI refresh.
+  async function handleRestart() {
+    if (
+      !window.confirm(
+        'Restart the logger process now?\n\nThis takes a few seconds -- live values and the PLC connection will briefly drop and reconnect on their own once it is back.'
+      )
+    ) {
+      return;
+    }
+    setRestartState('restarting');
+    try {
+      await fetch('/api/settings/restart', { method: 'POST' });
+    } catch {
+      // The process exits mid-response on purpose -- a network error here is expected, not a failure.
+    }
+
+    const deadline = Date.now() + 30000;
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          window.location.reload();
+          return;
+        }
+      } catch {
+        /* still down -- keep polling */
+      }
+      if (Date.now() < deadline) {
+        setTimeout(poll, 1000);
+      } else {
+        setRestartState({ ok: false, error: "Server didn't come back up -- check logger.log" });
+      }
+    };
+    setTimeout(poll, 1500); // give the old process time to actually exit before checking
+  }
+
   function updateTagField(index, field, value) {
     setTagRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
     setTagsSaveState(null);
@@ -283,6 +353,46 @@ export default function SettingsPage({ page, onNavigate }) {
       setTagsSaveState({ ok: true, restartRequired: data.restartRequired });
     } catch {
       setTagsSaveState({ ok: false, error: 'Request failed' });
+    }
+  }
+
+  function updateStatusTagField(index, field, value) {
+    setStatusTagRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+    setStatusTagsSaveState(null);
+  }
+
+  function addStatusTagRow() {
+    setStatusTagRows((prev) => [...prev, blankStatusTagRow()]);
+    setStatusTagsSaveState(null);
+  }
+
+  function removeStatusTagRow(index) {
+    const row = statusTagRows[index];
+    if (row.originalName && !window.confirm(`Remove "${row.originalName}" from the status tag list?`)) {
+      return;
+    }
+    setStatusTagRows((prev) => prev.filter((_, i) => i !== index));
+    setStatusTagsSaveState(null);
+  }
+
+  async function handleSaveStatusTags(e) {
+    e.preventDefault();
+    setStatusTagsSaveState('saving');
+    try {
+      const res = await fetch('/api/settings/status-tags', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: statusTagRows }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatusTagsSaveState({ ok: false, error: data.error || 'Save failed' });
+        return;
+      }
+      setStatusTagRows(data.tags.map((t) => ({ ...t, originalName: t.name })));
+      setStatusTagsSaveState({ ok: true, restartRequired: data.restartRequired });
+    } catch {
+      setStatusTagsSaveState({ ok: false, error: 'Request failed' });
     }
   }
 
@@ -447,6 +557,23 @@ export default function SettingsPage({ page, onNavigate }) {
         </section>
 
         <section className="settings-section settings-section--wide">
+          <h2 className="dashboard-group-title">Server</h2>
+          <p className="settings-note">
+            Tag/zone edits below are saved to disk immediately but only loaded by the logger process on
+            startup. Restart it here to pick them up right away instead of restarting it on the machine
+            yourself.
+          </p>
+          <div className="settings-actions">
+            <button type="button" onClick={handleRestart} disabled={restartState === 'restarting'}>
+              {restartState === 'restarting' ? 'Restarting…' : 'Restart Server'}
+            </button>
+          </div>
+          {restartState && restartState !== 'restarting' && !restartState.ok && (
+            <p className="settings-result bad">✗ {restartState.error}</p>
+          )}
+        </section>
+
+        <section className="settings-section settings-section--wide">
           <h2 className="dashboard-group-title">Logging Tags</h2>
 
           {tagRows == null ? (
@@ -558,6 +685,95 @@ export default function SettingsPage({ page, onNavigate }) {
                   {tagsSaveState.ok
                     ? '✓ Saved — restart the server for the tag list to take effect'
                     : `✗ ${tagsSaveState.error}`}
+                </p>
+              )}
+            </form>
+          )}
+        </section>
+
+        <section className="settings-section settings-section--wide">
+          <h2 className="dashboard-group-title">Status / Cycle Tags</h2>
+
+          {statusTagRows == null ? (
+            <p className="cycles-empty">Loading…</p>
+          ) : (
+            <form onSubmit={handleSaveStatusTags}>
+              <p className="settings-note">
+                Non-logging tags only -- discrete bool/enum signals (Mode, CycleStatus, alarms, ...) that
+                are never written to trend.db, just shown live. Only name/address/kind are editable here;
+                a tag's friendly value labels (e.g. 1 = "Running") stay defined in code/tags.json and are
+                left untouched by this editor -- a newly added tag just shows its raw value until labels
+                are added for it. Changes take effect the next time the server restarts.
+              </p>
+
+              <table className="tags-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>PLC Address</th>
+                    <th>Kind</th>
+                    <th>Default Active</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statusTagRows.map((row, i) => (
+                    <tr key={i}>
+                      <td>
+                        <input
+                          type="text"
+                          value={row.name}
+                          onChange={(e) => updateStatusTagField(i, 'name', e.target.value)}
+                          placeholder="Tag_Name"
+                          required
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          value={row.address}
+                          onChange={(e) => updateStatusTagField(i, 'address', e.target.value)}
+                          placeholder="DB1001,X0.0"
+                          required
+                        />
+                      </td>
+                      <td>
+                        <select value={row.kind} onChange={(e) => updateStatusTagField(i, 'kind', e.target.value)}>
+                          <option value="bool">bool</option>
+                          <option value="enum">enum</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={row.defaultActive}
+                          onChange={(e) => updateStatusTagField(i, 'defaultActive', e.target.checked)}
+                        />
+                      </td>
+                      <td>
+                        <button type="button" className="tags-row-delete" onClick={() => removeStatusTagRow(i)}>
+                          ✕ Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="settings-actions">
+                <button type="button" className="tags-add-btn" onClick={addStatusTagRow}>
+                  + Add Tag
+                </button>
+                <button type="submit" disabled={statusTagsSaveState === 'saving'}>
+                  {statusTagsSaveState === 'saving' ? 'Saving…' : 'Save Status Tags'}
+                </button>
+              </div>
+
+              {statusTagsSaveState && statusTagsSaveState !== 'saving' && (
+                <p className={`settings-result ${statusTagsSaveState.ok ? 'ok' : 'bad'}`}>
+                  {statusTagsSaveState.ok
+                    ? '✓ Saved — restart the server for the tag list to take effect'
+                    : `✗ ${statusTagsSaveState.error}`}
                 </p>
               )}
             </form>

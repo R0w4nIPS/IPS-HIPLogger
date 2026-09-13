@@ -1,6 +1,7 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const express = require('express');
 const { WebSocketServer } = require('ws');
 
@@ -93,7 +94,10 @@ wss.on('connection', (ws) => {
 // Gate SQLite writes on config.loggingGateTag (if set): the RAM buffer and
 // WebSocket broadcast always happen so the real-time trend keeps working
 // regardless -- only disk persistence is skipped while the tag reads 0.
-let loggingEnabled = !config.loggingGateTag;
+// Starts out `null` (unknown) rather than assuming off when a gate tag is
+// configured -- see the first-sample handling below, which reconciles that
+// against any cycle a previous run left open before adopting a value.
+let loggingEnabled = config.loggingGateTag ? null : true;
 
 // Last sample time actually written to SQLite, per tag -- used to thin out
 // disk writes for tags with `logIntervalSec` set (see config.js). Reset
@@ -106,7 +110,17 @@ poller.on('sample', (sample) => {
   const gateTag = config.loggingGateTag;
   if (gateTag && gateTag in sample.values) {
     const next = sample.values[gateTag] === 1;
-    if (next !== loggingEnabled) {
+    if (loggingEnabled === null) {
+      // First real read of the gate tag since this process started. Don't
+      // treat "on" here as a false->true edge (that would split a cycle a
+      // previous run left open into two rows every time the server
+      // restarts mid-cycle, whether from a crash or a deliberate restart)
+      // -- instead reconcile it against the DB directly: an open cycle
+      // stays open if the tag still reads on, and only gets closed if it
+      // now reads off (meaning it genuinely ended while this process was
+      // down). See db.js#reconcileOpenCycle.
+      db.reconcileOpenCycle(next, sample.t);
+    } else if (next !== loggingEnabled) {
       console.log(`[db] logging ${next ? 'enabled' : 'disabled'} (${gateTag})`);
       if (next) {
         db.startCycle(sample.t);
@@ -403,6 +417,115 @@ app.put('/api/settings/tags', (req, res) => {
   }
 
   res.json({ tags: value, restartRequired: true });
+});
+
+function serializeStatusTagRow(name, def) {
+  return {
+    name,
+    address: def.address,
+    kind: def.kind === 'enum' ? 'enum' : 'bool',
+    defaultActive: def.defaultActive !== false,
+  };
+}
+
+function validateStatusTagsPayload(body, preservedNames) {
+  const rows = body?.tags;
+  if (!Array.isArray(rows) || !rows.length) return { error: 'tags must be a non-empty array' };
+
+  const seen = new Set();
+  const clean = [];
+  for (const row of rows) {
+    const name = String(row.name || '').trim();
+    const address = String(row.address || '').trim();
+    if (!TAG_NAME_RE.test(name)) {
+      return { error: `"${name}" isn't a valid tag name (letters, digits, underscore; can't start with a digit)` };
+    }
+    if (seen.has(name)) return { error: `duplicate tag name: ${name}` };
+    if (preservedNames.has(name)) return { error: `"${name}" is a reserved analog/sensor tag name` };
+    seen.add(name);
+    if (!address) return { error: `${name}: address is required` };
+    clean.push({
+      name,
+      originalName: row.originalName ? String(row.originalName).trim() : null,
+      address,
+      kind: row.kind === 'enum' ? 'enum' : 'bool',
+      defaultActive: row.defaultActive !== false,
+    });
+  }
+  return { value: clean };
+}
+
+// /api/settings/status-tags -- the editable list of non-logging status/cycle
+// tags (trend: false in config.js -- Mode, CycleStatus, AlarmActive, ...).
+// Only name/address/kind/defaultActive are editable here; each tag's
+// per-value `labels` map (raw value -> {text, level}) is left as-is (or
+// empty for a newly added tag, which just shows its raw value until labels
+// are added in config.js/tags.json by hand).
+app.get('/api/settings/status-tags', (_req, res) => {
+  const tags = Object.entries(config.tags)
+    .filter(([, def]) => !isEditableTag(def))
+    .map(([name, def]) => serializeStatusTagRow(name, def));
+  res.json({ tags });
+});
+
+app.put('/api/settings/status-tags', (req, res) => {
+  const preserved = Object.fromEntries(Object.entries(config.tags).filter(([, def]) => isEditableTag(def)));
+  const { error, value } = validateStatusTagsPayload(req.body, new Set(Object.keys(preserved)));
+  if (error) return res.status(400).json({ error });
+
+  const existingStatusTags = Object.fromEntries(
+    Object.entries(config.tags).filter(([, def]) => !isEditableTag(def))
+  );
+
+  const nextStatusTags = {};
+  for (const row of value) {
+    const prior = existingStatusTags[row.originalName || row.name];
+    nextStatusTags[row.name] = {
+      ...prior,
+      address: row.address,
+      kind: row.kind,
+      defaultActive: row.defaultActive,
+      trend: false,
+      log: false,
+    };
+  }
+
+  const nextTags = { ...preserved, ...nextStatusTags };
+  config.tags = nextTags;
+  try {
+    fs.writeFileSync(path.join(__dirname, 'tags.json'), JSON.stringify(nextTags, null, 2));
+  } catch (err) {
+    return res.status(500).json({ error: `failed to save tags.json: ${err.message}` });
+  }
+
+  res.json({ tags: value, restartRequired: true });
+});
+
+// Tag edits above only take effect on the next process start (tag lists,
+// the PLC poller, and the RAM trend buffer are all built once at startup
+// from config.tags). Task Scheduler's start-hidden.vbs only launches the
+// process on logon and won't relaunch it if it exits on its own, so a
+// plain process.exit() here would just take the logger down until the
+// next reboot. Instead, spawn a detached replacement process first (same
+// argv/env, so --demo/--replay carry over, and stdio appended to the same
+// logger.log start-hidden.vbs already writes to), then exit -- the new
+// process keeps running under Task Scheduler's job after this one exits.
+app.post('/api/settings/restart', (_req, res) => {
+  res.json({ ok: true });
+  setTimeout(() => {
+    console.log('[restart] respawning on operator request from Settings');
+    poller.stop();
+    db.close();
+    const logFd = fs.openSync(path.join(__dirname, 'logger.log'), 'a');
+    const child = spawn(process.execPath, process.argv.slice(1), {
+      cwd: __dirname,
+      env: process.env,
+      detached: true,
+      stdio: ['ignore', logFd, logFd],
+    });
+    child.unref();
+    process.exit(0);
+  }, 250);
 });
 
 // Zone slots that must name a real tag vs. slots that may be left blank to

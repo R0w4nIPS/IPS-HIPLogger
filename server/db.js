@@ -75,22 +75,6 @@ class TrendDB {
       nameStmt.run(defaultCycleName(start_t), id);
     }
 
-    // A cycle left open (end_t NULL) means logging stopped without a clean
-    // LoggingOnOff true->false edge -- either this server crashed mid-cycle,
-    // or (e.g. after copying in a trend.db captured from another machine
-    // mid-cycle) it was never running here at all. Either way "now" is not
-    // the real end: close it out using the last sample actually logged
-    // after it started instead, so a stale/foreign open cycle gets its true
-    // duration rather than however long it happened to sit unopened before
-    // this server first read the file. Falls back to start_t (zero-length)
-    // if the cycle has no samples at all.
-    for (const { id, start_t } of this.db
-      .prepare('SELECT id, start_t FROM cycles WHERE end_t IS NULL')
-      .all()) {
-      const { max_t } = this.db.prepare('SELECT MAX(t) as max_t FROM samples WHERE t >= ?').get(start_t);
-      this.db.prepare('UPDATE cycles SET end_t = ? WHERE id = ?').run(max_t ?? start_t, id);
-    }
-
     this._insert = this.db.prepare('INSERT INTO samples (t, tag, v) VALUES (?, ?, ?)');
     this._flushTx = this.db.transaction((rows) => {
       for (const r of rows) this._insert.run(r[0], r[1], r[2]);
@@ -149,6 +133,34 @@ class TrendDB {
   /** Close out the currently-open cycle, if any (LoggingOnOff true -> false). */
   endCycle(t) {
     this._closeCycle.run(t);
+  }
+
+  /**
+   * Called once, right after the poller's first real read of the gate tag
+   * since this process started -- reconciles a cycle left open (end_t
+   * NULL) against what the tag actually reads *now* instead of assuming
+   * it's stale. A cycle can be left open by an unclean shutdown (crash,
+   * kill -9) or a deliberate restart (e.g. the Settings page's Restart
+   * Server button) caught mid-cycle -- in both cases the gate tag reading
+   * "on" again right away means it's the same cycle still running, so it's
+   * left open rather than split into two rows. Only closed here if the tag
+   * now reads "off": that means the cycle genuinely ended while this
+   * server was down (or, e.g. after copying in a trend.db captured from
+   * another machine, it was never running here at all) -- closed using the
+   * last sample actually logged after it started, since "now" is not the
+   * real end. Falls back to start_t (zero-length) if it has no samples.
+   */
+  reconcileOpenCycle(gateOn, t) {
+    const open = this.db.prepare('SELECT id, start_t FROM cycles WHERE end_t IS NULL').all();
+    if (!open.length) {
+      if (gateOn) this.startCycle(t);
+      return;
+    }
+    if (gateOn) return; // still running -- same cycle, leave it open across the restart
+    for (const { id, start_t } of open) {
+      const { max_t } = this.db.prepare('SELECT MAX(t) as max_t FROM samples WHERE t >= ?').get(start_t);
+      this.db.prepare('UPDATE cycles SET end_t = ? WHERE id = ?').run(max_t ?? start_t, id);
+    }
   }
 
   /**
