@@ -5,6 +5,9 @@ server/*.db
 server/*.db-shm
 server/*.db-wal
 
+# Console output redirected here by start-hidden.vbs -- runtime log, not source
+server/logger.log
+
 # Local overrides for PLC connection settings / logging tag list / furnace
 # heating zone cards / dashboard group tag membership (see the Settings
 # page) -- machine-specific, not something to version.
